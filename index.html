@@ -147,7 +147,28 @@
      letter-spacing: 2px;/* spazio tra le lettere */
      user-select: none;  /* non selezionabile */
     }
-
+     /* --- POPUP OPZIONI COLLEGAMENTO --- */
+.modalOverlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.modal{
+  width:min(420px, 92vw);
+  background:#fff;
+  border:1px solid rgba(0,0,0,.25);
+  border-radius:16px;
+  box-shadow:0 16px 50px rgba(0,0,0,.20);
+  padding:14px;
+}
+.modal h3{ margin:0 0 10px 0; font-size:16px; }
+.modal .row{ display:flex; gap:12px; flex-wrap:wrap; margin:10px 0; }
+.modal label{ display:flex; gap:8px; align-items:center; font-size:14px; cursor:pointer; }
+.modal .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    
   </style>
 </head>
 
@@ -202,11 +223,85 @@
 
   // ---------- stato ----------
   var pops = [];   // {id,x,y,text}
-  var links = [];  // {id,from,to}
+  var links = [];  // {id,from,to,end:"arrow|none",shape:"straight|curve"}
   var selectedBoxId = null;
   var selectedLinkId = null;
   var linkingFrom = null;
   var moveMode = false;
+    // --- opzioni collegamento (scelte al momento dell'attivazione di "Collega") ---
+  var linkPreset = { end: "arrow", shape: "straight" }; // default
+  var linkModal = null;
+
+  function ensureLinkModal() {
+    if (linkModal) return;
+
+    linkModal = document.createElement("div");
+    linkModal.className = "modalOverlay";
+    linkModal.innerHTML =
+      '<div class="modal" role="dialog" aria-modal="true">' +
+        '<h3>Opzioni collegamento</h3>' +
+
+        '<div class="row">' +
+          '<label><input type="radio" name="linkEnd" value="none"> Linea semplice</label>' +
+          '<label><input type="radio" name="linkEnd" value="arrow"> Freccia</label>' +
+        '</div>' +
+
+        '<div class="row">' +
+          '<label><input type="radio" name="linkShape" value="straight"> Retta</label>' +
+          '<label><input type="radio" name="linkShape" value="curve"> Curva</label>' +
+        '</div>' +
+
+        '<div class="actions">' +
+          '<button class="btn" id="linkOptCancel">Annulla</button>' +
+          '<button class="btn" id="linkOptOk">OK</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(linkModal);
+  }
+
+  function openLinkOptions(done) {
+    ensureLinkModal();
+
+    // pre-seleziona valori correnti
+    var endRadio = linkModal.querySelector('input[name="linkEnd"][value="' + linkPreset.end + '"]');
+    var shapeRadio = linkModal.querySelector('input[name="linkShape"][value="' + linkPreset.shape + '"]');
+    if (endRadio) endRadio.checked = true;
+    if (shapeRadio) shapeRadio.checked = true;
+
+    linkModal.style.display = "flex";
+
+    function close() {
+      linkModal.style.display = "none";
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      linkModal.onclick = null;
+    }
+
+    var okBtn = linkModal.querySelector("#linkOptOk");
+    var cancelBtn = linkModal.querySelector("#linkOptCancel");
+
+    okBtn.onclick = function () {
+      var endVal = (linkModal.querySelector('input[name="linkEnd"]:checked') || {}).value || "arrow";
+      var shapeVal = (linkModal.querySelector('input[name="linkShape"]:checked') || {}).value || "straight";
+      linkPreset = { end: endVal, shape: shapeVal };
+      close();
+      done(true);
+    };
+
+    cancelBtn.onclick = function () {
+      close();
+      done(false);
+    };
+
+    // click fuori dal box = annulla
+    linkModal.onclick = function (e) {
+      if (e.target === linkModal) {
+        close();
+        done(false);
+      }
+    };
+  }
 
   function clampToBoard(x, y) {
     var r = boardRect();
@@ -250,12 +345,33 @@
     for (var j=0;j<b.length;j++) b[j].classList.remove("selected");
   }
 
-  function setLinkMode(on) {
+    function setLinkMode(on) {
     if (on) {
       if (moveMode) setMoveMode(false);
       if (!selectedBoxId) { setStatus("Seleziona un box prima di collegare."); return; }
-      linkingFrom = selectedBoxId;
-      btnLink.classList.add("active");
+
+      // <<< QUI: popup opzioni (freccia/linea, retta/curva)
+      openLinkOptions(function (ok) {
+        if (!ok) { setStatus("Collegamento annullato."); return; }
+
+        linkingFrom = selectedBoxId;
+        btnLink.classList.add("active");
+        var a = document.querySelectorAll(".pop");
+        for (var i=0;i<a.length;i++) {
+          a[i].classList.toggle("linking", a[i].dataset.id === linkingFrom);
+        }
+        setStatus("Modalita collega: clicca un altro box.");
+      });
+
+      return; // IMPORTANTISSIMO: esci, perché ora la parte sopra è “async” via callback
+    } else {
+      linkingFrom = null;
+      btnLink.classList.remove("active");
+      var b = document.querySelectorAll(".pop");
+      for (var j=0;j<b.length;j++) b[j].classList.remove("linking");
+      setStatus("Pronto");
+    }
+  }
       var a = document.querySelectorAll(".pop");
       for (var i=0;i<a.length;i++) {
         a[i].classList.toggle("linking", a[i].dataset.id === linkingFrom);
@@ -301,13 +417,14 @@
     selectBox(p.id);
   }
 
-  function addLink(from, to) {
-    if (!from || !to || from === to) return;
-    for (var i=0;i<links.length;i++) {
-      if (links[i].from === from && links[i].to === to) return;
-    }
-    links.push({ id: uid(), from: from, to: to });
+ function addLink(from, to, preset) {
+  if (!from || !to || from === to) return;
+  for (var i=0;i<links.length;i++) {
+    if (links[i].from === from && links[i].to === to) return;
   }
+  var p = preset || linkPreset || { end:"arrow", shape:"straight" };
+  links.push({ id: uid(), from: from, to: to, end: p.end, shape: p.shape });
+}
 
   function deleteSelected() {
     if (selectedLinkId) {
@@ -384,25 +501,52 @@
       var p1 = edgePoint(A.cx, A.cy, A.hw, A.hh, dx, dy);
       var p2 = edgePoint(B.cx, B.cy, B.hw, B.hh, -dx, -dy);
 
-      var line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", p1.x);
-      line.setAttribute("y1", p1.y);
-      line.setAttribute("x2", p2.x);
-      line.setAttribute("y2", p2.y);
-      line.setAttribute("marker-end", "url(#arrow)");
-      line.classList.add("linkLine");
-      line.dataset.linkid = l.id;
+            var end = l.end || "arrow";       // compatibilità con vecchi file importati
+      var shape = l.shape || "straight";
 
-      if (l.id === selectedLinkId) line.classList.add("selected");
+      var elWire;
 
-      line.addEventListener("mousedown", function (e) {
+      if (shape === "curve") {
+        // curva: uso un path con Quadratic Bezier
+        var mx = (p1.x + p2.x) / 2;
+        var my = (p1.y + p2.y) / 2;
+
+        var len = Math.hypot(dx, dy) || 1;
+        var nx = -dy / len;   // normale (perpendicolare)
+        var ny =  dx / len;
+
+        var offset = Math.min(120, len / 3); // “quanto” curva
+        var cx = mx + nx * offset;
+        var cy = my + ny * offset;
+
+        elWire = document.createElementNS(NS, "path");
+        elWire.setAttribute("d", "M " + p1.x + " " + p1.y + " Q " + cx + " " + cy + " " + p2.x + " " + p2.y);
+      } else {
+        // retta: line
+        elWire = document.createElementNS(NS, "line");
+        elWire.setAttribute("x1", p1.x);
+        elWire.setAttribute("y1", p1.y);
+        elWire.setAttribute("x2", p2.x);
+        elWire.setAttribute("y2", p2.y);
+      }
+
+      if (end === "arrow") {
+        elWire.setAttribute("marker-end", "url(#arrow)");
+      }
+
+      elWire.classList.add("linkLine");
+      elWire.dataset.linkid = l.id;
+
+      if (l.id === selectedLinkId) elWire.classList.add("selected");
+
+      elWire.addEventListener("mousedown", function (e) {
         e.stopPropagation();
         setLinkMode(false);
         selectLink(l.id);
         setStatus("Link selezionato.");
       });
 
-      svg.appendChild(line);
+      svg.appendChild(elWire);
     });
   }
 
@@ -443,7 +587,7 @@
       // click ovunque nel box: se in modalita collega, crea link
       el.addEventListener("click", function () {
         if (linkingFrom && linkingFrom !== p.id) {
-          addLink(linkingFrom, p.id);
+          addLink(linkingFrom, p.id, linkPreset);
           setLinkMode(false);
           renderLinks();
           setStatus("Collegamento creato.");
