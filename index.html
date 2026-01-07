@@ -372,19 +372,7 @@
       setStatus("Pronto");
     }
   }
-      var a = document.querySelectorAll(".pop");
-      for (var i=0;i<a.length;i++) {
-        a[i].classList.toggle("linking", a[i].dataset.id === linkingFrom);
-      }
-      setStatus("Modalita collega: clicca un altro box.");
-    } else {
-      linkingFrom = null;
-      btnLink.classList.remove("active");
-      var b = document.querySelectorAll(".pop");
-      for (var j=0;j<b.length;j++) b[j].classList.remove("linking");
-      setStatus("Pronto");
-    }
-  }
+      
   function setMoveMode(on) {
   moveMode = !!on;
 
