@@ -100,6 +100,7 @@
 
     .linkLine{
       pointer-events:stroke;
+      fill: none;
       cursor:pointer;
       stroke: rgba(0,0,0,.55);
       stroke-width: 2;
@@ -505,11 +506,12 @@
         var nx = -dy / len;   // normale (perpendicolare)
         var ny =  dx / len;
 
-        var offset = Math.min(120, len / 3); // “quanto” curva
+        var offset = Math.min(70, Math.max(20, len / 4));// “quanto” curva
         var cx = mx + nx * offset;
         var cy = my + ny * offset;
 
         elWire = document.createElementNS(NS, "path");
+        elWire.setAttribute("fill", "none");
         elWire.setAttribute("d", "M " + p1.x + " " + p1.y + " Q " + cx + " " + cy + " " + p2.x + " " + p2.y);
       } else {
         // retta: line
