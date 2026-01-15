@@ -122,9 +122,9 @@
       pointer-events:auto;
     }
 
-    .pop{
+     .pop{
       position:absolute;
-      width:20ch;
+      min-width:8ch;      /* come nel file 32: si stringe ma non troppo */
       max-width:48ch;
       background:#fff;
       border:1px solid rgba(0,0,0,.55);
@@ -139,7 +139,7 @@
       justify-content:center;
       touch-action: none;
       pointer-events:auto;
-    }
+     }
     .pop:active{ cursor:grabbing; }
     .pop.selected{ outline:3px solid rgba(0,120,255,.25); }
     .pop.linking{ background:rgba(0,120,255,.08)!important; border-color:rgba(0,120,255,.35)!important; }
@@ -1066,7 +1066,8 @@
         placeholderAttr = ' placeholder="Inserisci qui l&#39;argomento della mappa"';
       }
 
-      el.innerHTML = '<textarea class="body" spellcheck="false"' + placeholderAttr + '></textarea>';
+      el.innerHTML =
+        '<textarea class="body" spellcheck="false" rows="1"' + placeholderAttr + '></textarea>';
       var ta = el.querySelector(".body");
       ta.value = p.text || "";
 
