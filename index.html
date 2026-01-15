@@ -785,38 +785,63 @@
   }
   
     function autoGrow(ta, popModel) {
-    // reset per calcolare bene lo scrollHeight
-    ta.style.height = "auto";
+   // reset per calcolare bene lo scrollHeight
+   ta.style.height = "auto";
 
-    // calcolo dell'altezza di UNA riga
-    var computed = window.getComputedStyle(ta);
-    var lineH = parseFloat(computed.lineHeight);
-    if (isNaN(lineH)) {
-      lineH = parseFloat(computed.fontSize) * 1.25 || 18; // fallback
-    }
+   // calcolo dell'altezza di UNA riga
+   var computed = window.getComputedStyle(ta);
+   var lineH = parseFloat(computed.lineHeight);
+   if (isNaN(lineH)) {
+     lineH = parseFloat(computed.fontSize) * 1.25 || 18; // fallback
+   }
 
-    var txt = ta.value || "";
-    var needed;
+   var txt = ta.value || "";
+   var needed;
 
-    if (!txt.trim()) {
-      // POP vuoto → una sola riga (o 4 se un giorno userai bigIntro)
-      if (popModel && popModel.bigIntro) {
-        needed = lineH * 4;
-      } else {
-        needed = lineH;
-      }
-    } else {
-      // c'è testo → altezza minima che permette di leggere tutto
-      needed = ta.scrollHeight;
-      if (needed < lineH) needed = lineH;
-    }
+   if (!txt.trim()) {
+    // POP vuoto
+    if (popModel && popModel.bigIntro) {
+      // solo il PRIMO pop può nascere a 4 righe
+      needed = lineH * 4;
+     } else {
+       // tutti gli altri (e il primo dopo l’uso) = una riga sola
+       needed = lineH;
+     }
+   } else {
+     // c'è testo → altezza minima che permette di leggere tutto
+     needed = ta.scrollHeight;
+     if (needed < lineH) needed = lineH;
+   }
 
-    if (popModel) {
-      popModel.height = needed;
-    }
+   if (popModel) {
+     popModel.height = needed;
+   }
 
-    ta.style.height = needed + "px";
-  }
+   ta.style.height = needed + "px";
+ }
+
+    function createPop(x, y) {
+    // è il primo POP della mappa?
+    var isFirst = (pops.length === 0);
+
+    var p = {
+      id: uid(),
+      x: x,
+      y: y,
+      text: "",
+      height: 0,
+      bigIntro: isFirst   // solo il primo POP nasce a 4 righe
+    };
+
+    pops.push(p);
+    render();
+
+    // 👉 MOSTRA IL SUGGERIMENTO SOLO QUANDO SI CREA UN NUOVO POP
+    setStatus("Suggerimento: scrivi un concetto chiave senza articoli o aggettivi (es. SI: Napoleone — NO: il grande Napoleone).");
+    selectBox(p.id);
+    var el = document.querySelector('[data-id="' + p.id + '"] .body');
+    if (el) el.focus();
+}
   
   function resizeSelectedTextarea() {
     if (!selectedBoxId) return;
