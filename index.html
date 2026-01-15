@@ -126,8 +126,8 @@
       position:absolute;
 
       /* 👉 niente width fissa */
-      min-width:5ch;          /* prova 3ch; se ti sembra troppo stretto, metti 4–5ch */
-      max-width:none;
+      min-width:20ch;      /* allarga a ~20 caratteri */
+      max-width:32ch;      /* limite massimo */
 
       background:#fff;
       border:1px solid rgba(0,0,0,.55);
@@ -149,7 +149,7 @@
 }
     .pop:focus-within{
   /* quando il textarea interno è in focus, il box si allarga a 20 "battute" */
-  min-width:28ch;
+  min-width:20ch;
 }
 
     .pop:active{ cursor:grabbing; }
@@ -159,8 +159,8 @@
     .body{
   /* 👉 lascia decidere alla textarea quanto essere larga,
      senza forzarla a riempire il box */
-  width:auto;
-  max-width:28ch;
+  width:100%;       /* prende tutta la larghezza del POP */
+  max-width:none;   /* nessun limite interno */
 
   border:0;
   outline:0;
