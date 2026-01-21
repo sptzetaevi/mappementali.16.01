@@ -298,27 +298,34 @@
     }
 
     @media print {
-      header { display:none !important; }
-      .ghost { display:none !important; }
+    header { display:none !important; }
+   .ghost { display:none !important; }
 
-      html, body { height: 100% !important; }
-      #app { height: 100% !important; }
-
-      #board {
-        background:#fff !important;
-        overflow: visible !important;
-        height: 100vh !important;
-      }
-
-      #wires {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      svg {
-        overflow: visible !important;
-      }
+  /* NASCONDI I TASTI FLOTTANTI IN STAMPA */
+    #controlsLeft,
+    #controlsRight {
+      display:none !important;
     }
+
+    html, body { height: 100% !important; }
+    #app { height: 100% !important; }
+
+    #board {
+      background:#fff !important;
+      overflow: visible !important;
+      height: 100vh !important;
+    }
+
+    #wires {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    svg {
+      overflow: visible !important;
+    }
+  }
+
 
     #mapTitle { font-weight:800; letter-spacing:2px; user-select:none; margin-left:6px; flex:0 0 auto; }
     #mapTitle .mapWord { font-size:16px; }
