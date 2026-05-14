@@ -1,1994 +1,918 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>m_mentale_57</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Appunti B1 - Gravidanza, nascita e patologie neonatali</title>
   <style>
     :root {
-      --bg:#f6f7fb;
-      --grid:rgba(0,0,0,.06);
-      --ink:#1a1a1a;
-      --controls-bottom:20px;  /* distanza di base dal fondo per i controlli flottanti */
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #52606d;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --border: #d9e2ec;
     }
 
-    html, body { height:100%; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--ink); }
-    #app { height:100%; display:grid; grid-template-rows:auto 1fr; }
-
-    /* HEADER con wrapper interno + maniglia */
-    header{
-      position:sticky;
-      top:0;
-      z-index:10;
-      background:#fff;
-      border-bottom:1px solid rgba(0,0,0,.08);
-      box-shadow:0 2px 6px rgba(0,0,0,.06);
-      box-sizing:border-box;
-    }
-    .headerInner{
-      gap:10px;
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      padding:10px 12px;
+    * {
+      box-sizing: border-box;
     }
 
-    /* Pulsanti a destra nell'header */
-    .rightButtons{
-      margin-left:auto;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 18px;
     }
 
-    /* Maniglia-cassetto ingrandita con frecce */
-    .headerHandle{
-      width:100%;
-      height:20px;
-      background:rgba(0,0,0,.18);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-    }
-    .headerHandle::before{
-      content:"▲ ▼";
-      font-size:11px;
-      letter-spacing:3px;
-      color:#f5f5f5;
-      opacity:0.9;
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: white;
+      padding: 32px 18px;
+      text-align: center;
     }
 
-    header.collapsed .headerInner{
-      display:none;
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      line-height: 1.2;
     }
 
-    .btn{
-      border:1px solid rgba(0,0,0,.18);
-      background:#fff;
-      border-radius:10px;
-      padding:7px 10px;
-      cursor:pointer;
-      font-size:13px;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{ background:#f7f7f7; }
-    .btn.active{
-      border-color: rgba(0,120,255,.55);
-      box-shadow: 0 0 0 3px rgba(0,120,255,.18);
-    }
-    .btn.danger{ border-color: rgba(200,0,0,.28); }
-    .btn.danger:hover{ background: rgba(200,0,0,.06); }
-
-    .hint{ font-size:13px; opacity:.75; flex: 1 1 320px; }
-    kbd{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:12px; border:1px solid rgba(0,0,0,.2); border-bottom-width:2px;
-      padding:1px 6px; border-radius:6px; background:#fafafa;
-    }
-    .status{
-      font-size:13px;
-      opacity:.9;
-      white-space:nowrap;
-      flex:1 1 60%;
-      order:90;
-      margin-top:4px;
-      padding:4px 8px;
-      border-radius:6px;
-      background:#e5e5e5;
+    header p {
+      margin: 0;
+      font-size: 1.05rem;
+      opacity: 0.95;
     }
 
-    .textControls{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:13px;
-      white-space:nowrap;
-      flex: 0 0 auto;
-      order: 90;
-      justify-content:flex-end;
-      margin-top:4px;
-      margin-left:auto;
-    }
-    .textControls input[type="color"]{
-      width:26px;
-      height:26px;
-      padding:0;
-      border-radius:6px;
-      border:1px solid rgba(0,0,0,.18);
-      background:#fff;
-      cursor:pointer;
-    }
-    .btn.tiny{
-      padding:4px 7px;
-      font-size:12px;
-      border-radius:8px;
-    }
-    .btn.tiny.active{
-      border-color: rgba(0,120,255,.7);
-      box-shadow:0 0 0 2px rgba(0,120,255,.22);
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 10px;
+      overflow-x: auto;
+      white-space: nowrap;
     }
 
-    #board{
-      position:relative; overflow:hidden;
-      touch-action: none;
-      background:
-        linear-gradient(var(--bg), var(--bg)),
-        repeating-linear-gradient(0deg, transparent, transparent 23px, var(--grid) 24px),
-        repeating-linear-gradient(90deg, transparent, transparent 23px, var(--grid) 24px);
-    }
-    #viewport{
-      position:absolute;
-      left:0; top:0;
-      width:8000px;
-      height:8000px;
-      transform-origin: 0 0;
-    }
-
-    #world{
-      position:absolute;
-      left:0;
-      top:0;
-      width:100%;
-      height:100%;
-      pointer-events:none;
-    }
-
-    svg{
-      position:absolute; inset:0;
-      width:100%;
-      height:100%;
-      overflow:visible;
-      pointer-events:auto;
-    }
-
-    .pop{
-      position:absolute;
-      min-width:20ch;
-      max-width:32ch;
-      background:#fff;
-      border:1px solid rgba(0,0,0,.55);
-      border-radius:14px;
-      box-shadow:0 8px 24px rgba(0,0,0,.10);
-      padding:6px;
-      box-sizing:border-box;
-      user-select:none;
-      cursor:grab;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      touch-action:none;
-      pointer-events:auto;
-    }
-
-    .pop:focus-within{
-      min-width:20ch;
-    }
-
-    .pop:active{ cursor:grabbing; }
-    .pop.selected{ outline:3px solid rgba(0,120,255,.25); }
-    .pop.linking{ background:rgba(0,120,255,.08)!important; border-color:rgba(0,120,255,.35)!important; }
-
-    .body{
-      width:100%;
-      max-width:none;
-      border:0;
-      outline:0;
-      resize:none;
-      overflow-y:auto;
-      background:transparent;
-      color:inherit;
-      font-size:14px;
-      line-height:1.25;
-      padding:0;
-      margin:0;
-      box-sizing:border-box;
-      min-height:1.25em;
-      white-space:pre-wrap;
-      word-break:normal;
-      text-align:center;
-    }
-
-    .body::placeholder{
-      color:rgba(0,0,0,.45);
-      font-size:12px;
-      text-align:center;
-    }
-
-    .linkLine{
-      pointer-events:stroke;
-      fill: none;
-      cursor:pointer;
-      stroke: rgba(0,0,0,.55);
-      stroke-width: 2;
-      stroke-linecap: round;
-    }
-    .linkLine.selected{
-      stroke-width: 3;
-    }
-
-    .ghost{
-      position:absolute; inset:0; pointer-events:none;
-      display:flex; align-items:center; justify-content:center;
-      font-size:14px; opacity:.55;
-      text-align:center;
-      padding:8px;
-    }
-
-    /* Controlli flottanti in basso a destra/sinistra */
-    #controlsRight {
-      position: fixed;
-      bottom: var(--controls-bottom);
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 999;
-      pointer-events:none;
-    }
-
-    #controlsLeft {
-      position: fixed;
-      bottom: var(--controls-bottom);
-      left: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 999;
-      pointer-events:none;
-    }
-
-    #controlsRight .btn,
-    #controlsLeft .btn {
-      pointer-events: auto;
-    }
-
-    /* Ingrandisco i pulsanti flottanti +, - e ✋ */
-    #controlsRight .btn.tiny {
+    nav a {
+      display: inline-block;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
       padding: 8px 12px;
-      font-size: 15px;
+      margin: 2px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    section {
+      background: var(--card);
+      margin: 18px 0;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #0f172a;
+      font-size: 1.55rem;
+      line-height: 1.25;
+      border-left: 8px solid var(--accent);
+      padding-left: 12px;
+    }
+
+    h3 {
+      margin-top: 26px;
+      color: #1e3a8a;
+      font-size: 1.25rem;
+      line-height: 1.3;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    ul, ol {
+      padding-left: 26px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    strong {
+      color: #111827;
+    }
+
+    .box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 14px 0;
+    }
+
+    .note {
+      background: #fff7ed;
+      border-left: 6px solid #f97316;
+      padding: 12px 14px;
       border-radius: 12px;
-      min-width: 40px;
+      color: #431407;
     }
 
-    /* Pan flottante ben visibile quando attivo */
-    #btnPan_f.active {
-      background: rgba(0,120,255,.12);
-      border-color: rgba(0,120,255,.8);
-      box-shadow: 0 0 0 3px rgba(0,120,255,.25);
+    .top {
+      display: block;
+      margin-top: 18px;
+      color: var(--accent);
+      font-weight: bold;
+      text-decoration: none;
     }
 
-    /* Sposta flottante ben visibile quando attivo */
-    #btnMove_f.active {
-      background: rgba(0,120,255,.12);
-      border-color: rgba(0,120,255,.8);
-      box-shadow: 0 0 0 3px rgba(0,120,255,.25);
+
+    .flashcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
     }
 
-    /* Nascondo i bottoni originali nel header,
-       ma li tengo nel DOM per riusare la logica JS */
-    #btnZoomIn,
-    #btnZoomOut,
-    #btnPan,
-    #btnMove,
-    #btnLink {
-      display: none !important;
+    .flashcard {
+      min-height: 170px;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      background: #eef6ff;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-2px);
+      background: #dbeafe;
+    }
+
+    .flashcard .question {
+      display: block;
+      font-weight: 800;
+      color: #1e3a8a;
+      font-size: 1.05rem;
+    }
+
+    .flashcard .answer {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #93c5fd;
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .flashcard.open {
+      background: #ecfdf5;
+      border-color: #86efac;
+    }
+
+    .flashcard.open .answer {
+      display: block;
+    }
+
+    .flashcard.open .question::before {
+      content: "✓ ";
+      color: #15803d;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        font-size: 17px;
+      }
+
+      header {
+        padding: 26px 14px;
+      }
+
+      header h1 {
+        font-size: 1.55rem;
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      section {
+        padding: 16px;
+        border-radius: 14px;
+      }
+
+      h2 {
+        font-size: 1.35rem;
+      }
+
+      nav a {
+        font-size: 0.9rem;
+        padding: 7px 10px;
+      }
     }
 
     @media print {
-    header { display:none !important; }
-   .ghost { display:none !important; }
-
-  /* NASCONDI I TASTI FLOTTANTI IN STAMPA */
-    #controlsLeft,
-    #controlsRight {
-      display:none !important;
-    }
-
-    html, body { height: 100% !important; }
-    #app { height: 100% !important; }
-
-    #board {
-      background:#fff !important;
-      overflow: visible !important;
-      height: 100vh !important;
-    }
-
-    #wires {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    svg {
-      overflow: visible !important;
-    }
-  }
-
-
-    #mapTitle { font-weight:800; letter-spacing:2px; user-select:none; margin-left:6px; flex:0 0 auto; }
-    #mapTitle .mapWord { font-size:16px; }
-    #mapTitle .mentalWord { font-size:22px; }
-
-    .homeLogo{
-      margin-left: 10px;
-      text-decoration: none;
-    }
-    .homeLogo .logoLetters{
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 2px solid rgba(0,0,0,.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 2px;
-      color: var(--ink);
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,.12);
-      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .homeLogo:hover .logoLetters{
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(0,0,0,.16);
-      border-color: rgba(0,120,255,.6);
-    }
-
-    /* POPUP generici */
-    .modalOverlay{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-    }
-    .modal{
-      width:min(420px, 92vw);
-      background:#fff;
-      border:1px solid rgba(0,0,0,.25);
-      border-radius:16px;
-      box-shadow:0 16px 50px rgba(0,0,0,.20);
-      padding:14px;
-    }
-    .modal h3{ margin:0 0 10px 0; font-size:16px; }
-    .modal .row{ display:flex; gap:12px; flex-wrap:wrap; margin:10px 0; }
-    .modal label{ display:flex; gap:8px; align-items:center; font-size:14px; cursor:pointer; }
-    .modal .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
-
-    /* Pulsante triplo Salva rapido / Opzioni salvataggio / Importa */
-    .tripleSplit{
-      display:inline-flex;
-      flex-direction:row;
-      margin:0 6px;
-    }
-    .tripleSplit .btn{
-      padding:4px 10px;
-      font-size:12px;
-      border-radius:0;
-    }
-    .tripleSplit .btn.tripleLeft{
-      border-radius:10px 0 0 10px;
-    }
-    .tripleSplit .btn.tripleCenter{
-      border-radius:0;
-      border-left:1px solid rgba(0,0,0,.18);
-      border-right:1px solid rgba(0,0,0,.18);
-    }
-    .tripleSplit .btn.tripleRight{
-      border-radius:0 10px 10px 0;
-      border-left:1px solid rgba(0,0,0,.18);
-    }
-
-    /* Ottimizzazioni base per schermi piccoli */
-    @media (max-width: 768px) {
-      .headerInner {
-        padding:6px 8px;
-        flex-wrap:wrap;
+      nav {
+        display: none;
       }
 
-      #mapTitle {
-        font-size:20px;
-        font-weight:800;
-        letter-spacing:2px;
-        user-select:none;
-        margin-left:6px;
-        flex:1 1 100%;
+      body {
+        background: white;
+        font-size: 12pt;
       }
 
-      .status{
-        font-size:13px;
-        opacity:.9;
-        white-space:normal;
-        flex:1 1 100%;
-        order:90;
-        margin-top:4px;
-        padding:4px 8px;
-        border-radius:6px;
-        background:#e5e5e5;
+      section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
       }
 
-      .textControls {
-        display:flex;
-        flex-wrap:wrap;
-        gap:6px;
-        flex:1 1 100%;
-        justify-content:flex-start;
-        margin-top:4px;
-      }
-
-      .btn {
-        font-size:12px;
-        padding:5px 7px;
-        white-space:nowrap;
-      }
-
-      .pop {
-        max-width: 28ch;
+      header {
+        background: white;
+        color: black;
+        border-bottom: 2px solid #000;
       }
     }
   </style>
 </head>
 
-<body>
-<div id="app">
-
-  <header id="mainHeader">
-    <div class="headerInner">
-      <!-- Logo prima -->
-      <a
-         class="homeLogo"
-         href="https://sptzetaevi.github.io/antimappificio/"
-         title="Torna alla pagina principale ANTIMAPPIFICIO">
-        <span class="logoLetters">A&nbsp;M</span>
-      </a>
-
-      <!-- Titolo subito dopo il logo -->
-      <span id="mapTitle"><span class="mapWord">MAPPA</span> <span class="mentalWord">MENTALE</span></span>
-
-      <!-- Tutti gli altri tasti -->
-      <div class="rightButtons">
-        <button class="btn" id="btnNew" >+ Nuovo pop</button>
-        <button class="btn" id="btnMove">Sposta</button>
-        <button class="btn" id="btnLink">Collega</button>
-        <button class="btn danger" id="btnDelete">Elimina</button>
-
-        <button class="btn" id="btnPdf">Stampa in PDF</button>
-
-        <!-- Pulsante triplo compatto orizzontale: Salva rapido / Opzioni salvataggio / Importa -->
-        <div class="tripleSplit">
-          <button class="btn tripleLeft" id="btnQuickSave">
-            <span>Salva</span>
-          </button>
-          <button class="btn tripleCenter" id="btnSaveOptions">
-            <span>Salva con nome</span>
-          </button>
-          <button class="btn tripleRight" id="btnImport">
-            <span>Apri…</span>
-          </button>
-        </div>
-
-        <input id="fileInput" type="file" accept=".json,.html" style="display:none" />
-
-        <button class="btn tiny" id="btnZoomIn">+</button>
-        <button class="btn tiny" id="btnZoomOut">-</button>
-        <button class="btn tiny" id="btnPan" title="Pan vista">
-          <span aria-hidden="true">✋</span>
-        </button>
-        <button class="btn tiny" id="btnKeyboardHelp">Info e comandi</button>
-      </div>
-
-      <span class="status" id="status">Avvio...</span>
-
-      <div class="textControls">
-        <span>Formato:</span>
-        <input type="color" id="txtColor" value="#000000" disabled>
-        <button class="btn tiny" id="btnSizeSmall" disabled>-</button>
-        <button class="btn tiny" id="btnSizeLarge" disabled>+</button>
-        <button class="btn tiny" id="btnBold" disabled><b>B</b></button>
-      </div>
-    </div>
-
-    <div class="headerHandle" id="headerHandle" title="Mostra/nascondi strumenti"></div>
+<body id="top">
+  <header>
+    <h1>Appunti semplificati livello B1</h1>
+    <p>Gravidanza, nascita, sviluppo del bambino, screening e malattie</p>
   </header>
 
-  <div id="board">
-    <div id="viewport">
-      <svg id="wires"></svg>
-      <div id="world"></div>
-    </div>
+  <nav aria-label="Indice">
+    <a href="#spina-bifida">Spina bifida</a>
+    <a href="#alimentazione">Alimentazione</a>
+    <a href="#auxologia">Auxologia</a>
+    <a href="#ittero-men">Ittero e MEN</a>
+    <a href="#asfissia">Asfissia</a>
+    <a href="#screening">Screening</a>
+    <a href="#metaboliche">Malattie metaboliche</a>
+    <a href="#prenatale">Diagnosi prenatale</a>
+    <a href="#fecondazione">Fecondazione</a>
+    <a href="#mst">MST</a>
+    <a href="#scabbia">Scabbia</a>
+    <a href="#flashcard">Flashcard</a>
+  </nav>
 
-    <div class="ghost">Doppio click (o doppio tap) sullo sfondo per creare un pop</div>
-  </div>
+  <main>
+    <section id="spina-bifida">
+      <h2>La spina bifida</h2>
+      <p>La spina bifida è una <strong>malformazione congenita</strong>. Significa che il bambino nasce con un problema nello sviluppo della colonna vertebrale e del midollo spinale. Questo problema si sviluppa durante la vita embrionale.</p>
+      <p>La causa precisa non è ancora conosciuta. Probabilmente dipende da fattori genetici e dalla carenza di acido folico durante la gravidanza.</p>
+      <p>Può causare:</p>
+      <ul>
+        <li><strong>deficit neurologici</strong>, come incontinenza, difficoltà di movimento e ridotta sensibilità degli arti;</li>
+        <li><strong>alterazioni scheletriche</strong>, come scoliosi, piede equino e deformazioni delle anche e delle caviglie;</li>
+        <li><strong>disturbi metabolici</strong>, come obesità.</li>
+      </ul>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
 
-  <!-- BOX Info e comandi -->
-  <div class="modalOverlay" id="kbdOverlay">
-    <div class="modal">
-      <h3>Info e comandi</h3>
-      <p style="font-size:14px; line-height:1.4; margin:6px 0 10px;">
-        Doppio click / doppio tap = crea box • Trascina sfondo in modalità Pan = sposta vista • click linea = seleziona (per eliminare) •
-        doppio click linea = modifica • <kbd>CANC</kbd>/Elimina = elimina • <kbd>ESC</kbd> = annulla collega
-      </p>
-      <div class="actions">
-        <button class="btn tiny" id="btnKbdClose">Chiudi</button>
+    <section id="alimentazione">
+      <h2>Alimentazione del neonato</h2>
+      <p>Nei primi mesi di vita il neonato si alimenta con latte materno oppure, se necessario, con latte artificiale in polvere.</p>
+      <p>Durante lo svezzamento si introducono gradualmente nuovi alimenti, come cereali, verdure e alimenti ricchi di proteine.</p>
+      <p>Dal quinto mese si possono iniziare alimenti semisolidi, come omogeneizzati di frutta.</p>
+      <p>È importante introdurre un alimento nuovo alla volta, così da controllare eventuali allergie o intolleranze.</p>
+      <p>Si possono utilizzare:</p>
+      <ul>
+        <li>brodo vegetale;</li>
+        <li>creme di cereali;</li>
+        <li>liofilizzati;</li>
+        <li>omogeneizzati di carne.</li>
+      </ul>
+      <p>L’alimentazione deve essere adattata alla crescita del bambino.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="auxologia">
+      <h2>Auxologia</h2>
+      <p>L’auxologia è la disciplina che studia la crescita del bambino e lo sviluppo fisico e sessuale dell’adolescente.</p>
+      <p>La crescita del corpo è un processo continuo, ma non sempre regolare. Inizia con il concepimento e termina con la maturazione sessuale.</p>
+      <p>La crescita è influenzata da:</p>
+      <ul>
+        <li>ghiandole endocrine;</li>
+        <li>ormone della crescita, chiamato GH;</li>
+        <li>alimentazione;</li>
+        <li>ambiente.</li>
+      </ul>
+      <p>La crescita non riguarda solo il corpo, ma anche lo sviluppo emotivo, mentale e comportamentale.</p>
+      <p>Per controllare la crescita, l’auxologo utilizza le curve di crescita. Sono grafici che mostrano i valori considerati normali.</p>
+      <p>La crescita viene valutata anche dal punto di vista genitale e sessuale.</p>
+      <p>La crescita può cambiare in base al sesso e all’etnia.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="ittero-men">
+      <h2>Ittero e malattia emolitica neonatale</h2>
+      <p>Talvolta l’ittero può essere un sintomo iniziale della MEN, cioè la <strong>malattia emolitica neonatale</strong>.</p>
+      <p>Questa malattia è causata da una incompatibilità tra il gruppo sanguigno della madre e quello del feto. Può provocare anemia e aumento della bilirubina.</p>
+
+      <div class="box">
+        <p><strong>I casi meno gravi</strong> si verificano quando:</p>
+        <ul>
+          <li>la madre ha gruppo sanguigno 0;</li>
+          <li>il bambino ha gruppo A oppure B.</li>
+        </ul>
       </div>
-    </div>
-  </div>
 
-  <!-- PANNELLO OPZIONI SALVATAGGIO -->
-  <div class="modalOverlay" id="saveOverlay">
-    <div class="modal">
-      <h3>Opzioni di salvataggio</h3>
-      <div class="row">
-        <label>
-          <input type="radio" name="saveFormat" value="json" checked>
-          JSON (salva un file che potrai re-importare per modificare)
-        </label>
-        <label>
-          <input type="radio" name="saveFormat" value="html">
-          HTML (salva un file che potrai re-importare ma anche aprire con il tuo browser - es.firefox, edge, chrome ecc..)
-        </label>
+      <p>I casi più gravi sono legati al fattore Rh. Il fattore Rh è una proteina presente sulla superficie dei globuli rossi.</p>
+      <p>Quando il sangue del feto entra in contatto con quello della madre, il corpo della madre può produrre anticorpi contro il sangue del bambino. Questi anticorpi possono passare al feto e distruggere i globuli rossi.</p>
+      <p>La distruzione dei globuli rossi provoca accumulo di bilirubina.</p>
+      <p>Questo problema è raro nella prima gravidanza, ma può comparire nelle gravidanze successive.</p>
+      <p>L’eccesso di bilirubina può causare:</p>
+      <ul>
+        <li>danni neurologici;</li>
+        <li>encefalopatia;</li>
+        <li>difficoltà di suzione;</li>
+        <li>debolezza muscolare;</li>
+        <li>sonnolenza intensa.</li>
+      </ul>
+      <p>Nei casi più gravi può portare anche alla morte del neonato.</p>
+      <p>Quando i livelli di bilirubina non sono troppo alti, si utilizza la fototerapia.</p>
+      <p>La fototerapia consiste nell’esposizione del bambino a luci di diversi colori e lunghezze d’onda.</p>
+      <p>La bilirubina assorbe bene la luce blu, ma questa può essere dannosa per gli occhi. La luce verde penetra più in profondità nella pelle. La luce più utilizzata è quella bianca.</p>
+
+      <h3>Malattia emorragica del neonato</h3>
+      <p>La malattia emorragica del neonato è una malattia del periodo neonatale.</p>
+      <p>Provoca un aumento del sanguinamento perché il sangue coagula male a causa della carenza di vitamina K.</p>
+
+      <h3>MEN — Malattia emolitica neonatale</h3>
+      <p>L’ittero fisiologico compare in circa due neonati su tre, tra il terzo e il quarto giorno di vita.</p>
+      <p>In questi casi la bilirubina non supera i 15 mg/100 ml.</p>
+      <p>Di solito non è necessario un trattamento importante, ma si consiglia la fototerapia.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="asfissia">
+      <h2>Asfissia neonatale</h2>
+      <p>L’asfissia neonatale è una carenza di ossigeno nel sangue e nei tessuti del neonato. È causata anche da un aumento dell’anidride carbonica.</p>
+
+      <h3>Cause durante la gravidanza</h3>
+      <ul>
+        <li>malattie cardiache della madre;</li>
+        <li>malattie respiratorie della madre;</li>
+        <li>problemi della placenta;</li>
+        <li>cordone ombelicale attorno al collo del feto.</li>
+      </ul>
+
+      <h3>Cause durante il parto</h3>
+      <ul>
+        <li>parto troppo lungo;</li>
+        <li>aspirazione del liquido amniotico;</li>
+        <li>eccessiva quantità di anestetici dati alla madre.</li>
+      </ul>
+
+      <p>Il neonato può avere:</p>
+      <ul>
+        <li>colore rosso-bluastro: <strong>asfissia cianotica</strong>;</li>
+        <li>colore molto pallido: <strong>asfissia bianca</strong>.</li>
+      </ul>
+
+      <p>L’asfissia bianca è molto pericolosa e può causare gravi danni al sistema nervoso.</p>
+      <p>Alla nascita il neonato viene valutato con il punteggio di Apgar.</p>
+      <p>Le cure principali sono:</p>
+      <ul>
+        <li>liberare le vie respiratorie;</li>
+        <li>somministrare ossigeno.</li>
+      </ul>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="screening">
+      <h2>Malattie che si possono individuare con lo screening</h2>
+
+      <h3>1. Malattia di Fabry</h3>
+      <p>È una malattia genetica.</p>
+      <p>Provoca accumulo di sostanze nei tessuti del corpo. Può causare danni a reni, cuore e sistema nervoso.</p>
+      <p>La terapia è enzimatica.</p>
+
+      <h3>2. Malattia di Pompe</h3>
+      <p>È una malattia dovuta alla mancanza di un enzima chiamato alfa-glucosidasi.</p>
+      <p>Provoca accumulo di glicogeno nei muscoli e può coinvolgere anche il cuore.</p>
+      <p>La terapia è enzimatica sostitutiva.</p>
+
+      <h3>3. LSD</h3>
+      <p>Le LSD sono malattie genetiche da accumulo lisosomiale.</p>
+      <p>Sono causate dalla mancanza di enzimi lisosomiali.</p>
+      <p>Provocano accumulo di sostanze nei tessuti e possono colpire cuore, ossa, fegato e sistema nervoso.</p>
+      <p>Esistono terapie specifiche.</p>
+
+      <h3>4. Fibrosi cistica</h3>
+      <p>È una malattia genetica autosomica recessiva.</p>
+      <p>Provoca secrezioni molto dense nei polmoni e nel pancreas.</p>
+      <p>Le nuove terapie migliorano molto la qualità della vita.</p>
+
+      <h3>5. Atrofia muscolare spinale</h3>
+      <p>È una malattia genetica.</p>
+      <p>Provoca degenerazione dei motoneuroni spinali e debolezza muscolare.</p>
+      <p>Le forme più gravi compaiono nei primi mesi di vita.</p>
+      <p>Le nuove terapie sono più efficaci se iniziate presto.</p>
+
+      <h3>6. SCID</h3>
+      <p>Le SCID sono immunodeficienze congenite severe.</p>
+      <p>Sono malattie genetiche che causano gravi problemi del sistema immunitario.</p>
+      <p>I neonati possono avere infezioni frequenti e molto gravi.</p>
+      <p>La terapia principale è il trapianto di cellule staminali, da fare il prima possibile.</p>
+
+      <h3>Fattori di rischio e di danno nello sviluppo embrio-fetale</h3>
+      <p>I principali fattori di rischio sono:</p>
+      <ul>
+        <li>malattie della madre, come ipertensione, diabete, tumori o infezioni;</li>
+        <li>età della madre;</li>
+        <li>uso di sostanze, alcol e fumo;</li>
+        <li>problemi nelle gravidanze precedenti;</li>
+        <li>complicazioni durante gravidanza, travaglio o parto.</li>
+      </ul>
+      <p>I problemi possono essere prenatali, perinatali o neonatali.</p>
+
+      <h3>Prevenzione neonatale</h3>
+      <p>Gli screening neonatali metabolici permettono di individuare presto molte malattie congenite.</p>
+      <p>L’obiettivo è intervenire prima della comparsa dei sintomi, per migliorare la qualità della vita del bambino e, in alcuni casi, evitare la morte.</p>
+      <p>Per individuare le malattie metaboliche ereditarie si utilizzano test non invasivi.</p>
+      <p>Questi test misurano nel sangue alcune sostanze chiamate metaboliti.</p>
+      <p>L’esame si esegue con poche gocce di sangue prese dal tallone del neonato tra le 48 e le 72 ore di vita.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="metaboliche">
+      <h2>Malattie metaboliche ereditarie</h2>
+      <p>Le malattie metaboliche ereditarie sono chiamate anche errori congeniti del metabolismo.</p>
+      <p>Fanno parte delle malattie rare.</p>
+      <p>Il metabolismo è l’insieme delle trasformazioni chimiche che avvengono nel nostro corpo.</p>
+      <p>Queste malattie sono causate da alterazioni genetiche.</p>
+      <p>La persona malata possiede un gene difettoso che provoca:</p>
+      <ul>
+        <li>mancanza di enzimi;</li>
+        <li>enzimi che funzionano male.</li>
+      </ul>
+      <p>Questo può causare:</p>
+      <ul>
+        <li>accumulo di sostanze tossiche;</li>
+        <li>mancanza di sostanze importanti per il corpo.</li>
+      </ul>
+      <p>Esistono centinaia di malattie metaboliche genetiche diverse.</p>
+
+      <h3>1. Ipotiroidismo congenito</h3>
+      <p>Provoca ridotta o assente produzione di ormoni tiroidei.</p>
+      <p>Può causare ritardi nella crescita e nello sviluppo neurologico.</p>
+      <p>La terapia è la levotiroxina.</p>
+
+      <h3>2. Fenilchetonuria</h3>
+      <p>È causata dalla mancanza dell’enzima che metabolizza la fenilalanina.</p>
+      <p>La terapia consiste in una dieta povera di fenilalanina.</p>
+      <p>L’accumulo di questa sostanza può essere tossico per il sistema nervoso e causare disabilità intellettiva.</p>
+
+      <h3>3. Galattosemia</h3>
+      <p>È un difetto nel metabolismo del galattosio, cioè uno zucchero del latte.</p>
+      <p>Può causare danni al fegato, danni neurologici e infezioni gravi.</p>
+      <p>La terapia consiste nell’eliminare lattosio e galattosio dalla dieta.</p>
+
+      <h3>4. Difetto di biotinidasi</h3>
+      <p>Provoca difficoltà nel riutilizzare la vitamina B7.</p>
+      <p>Può causare crisi epilettiche, ipotrofia e problemi cutanei.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="prenatale">
+      <h2>Diagnosi prenatale ed esami</h2>
+      <p>Per diagnosi prenatale si intende l’insieme di indagini, strumentali o di laboratorio, utili a controllare lo stato di salute del feto dalle prime fasi fino al parto.</p>
+      <p>Nella popolazione la probabilità di avere un bambino con un problema congenito alla nascita è pari al 3%.</p>
+      <ul>
+        <li>1% delle anomalie riguarda i cromosomi e il DNA;</li>
+        <li>2% riguarda malformazioni al cuore, ai reni o malattie infettive.</li>
+      </ul>
+
+      <h3>Esami non invasivi</h3>
+      <p>Gli esami non invasivi non comportano rischi per il feto.</p>
+
+      <h3>1. Esami del sangue materno</h3>
+      <p>Servono a controllare epatiti, HIV, toxoplasmosi e rosolia.</p>
+
+      <h3>2. NIPT</h3>
+      <p>È un test del DNA fetale presente nel sangue materno.</p>
+      <p>Si esegue intorno alla decima settimana.</p>
+      <p>È molto accurato per individuare trisomie 21, 13 e 18.</p>
+
+      <h3>3. Bitest</h3>
+      <p>Si esegue tra l’undicesima e la tredicesima settimana.</p>
+      <p>È un test di screening, non diagnostico.</p>
+      <p>Comprende un esame del sangue e una ecografia.</p>
+      <p>Valuta il rischio di sindrome di Down, trisomia 21, trisomia 13 e trisomia 18.</p>
+
+      <h3>4. Ecografie</h3>
+      <p>Si eseguono durante i tre trimestri della gravidanza per controllare datazione della gravidanza, sviluppo del feto e crescita.</p>
+
+      <h3>Esami invasivi</h3>
+      <p>Gli esami invasivi sono esami diagnostici e danno maggiore certezza.</p>
+      <p>Prevedono un prelievo dall’utero.</p>
+
+      <h3>1. Villocentesi</h3>
+      <p>Si esegue tra la decima e la tredicesima settimana.</p>
+      <p>Prevede il prelievo dei villi coriali della placenta.</p>
+      <p>Permette diagnosi certe di malattie cromosomiche.</p>
+      <p>Ha un piccolo rischio di aborto.</p>
+
+      <h3>2. Amniocentesi</h3>
+      <p>Si esegue tra la quindicesima e la diciottesima settimana.</p>
+      <p>Prevede il prelievo del liquido amniotico.</p>
+      <p>Analizza il cariotipo fetale.</p>
+      <p>Anche questo esame ha un piccolo rischio di aborto.</p>
+
+      <h3>3. Funicolocentesi</h3>
+      <p>Consiste nel prelievo di sangue fetale dal cordone ombelicale.</p>
+
+      <h3>Trisomie dei cromosomi sessuali</h3>
+      <p>Possono essere presenti:</p>
+      <ul>
+        <li>XXX;</li>
+        <li>XXY, cioè sindrome di Klinefelter;</li>
+        <li>XYY.</li>
+      </ul>
+      <p>In molti casi l’aspettativa di vita è normale.</p>
+      <p>Molte altre trisomie autosomiche provocano aborto spontaneo.</p>
+      <p>La monosomia può causare la sindrome di Turner nelle femmine.</p>
+
+      <h3>Trisomie compatibili con la vita</h3>
+
+      <h3>Trisomia 21 — Sindrome di Down</h3>
+      <p>È la trisomia più frequente.</p>
+      <p>Può causare disabilità intellettiva variabile, ritardo dello sviluppo, problemi cardiaci e problemi alla tiroide.</p>
+      <p>Sono presenti anche caratteristiche fisiche tipiche, come viso piatto, occhi a mandorla e bassa statura.</p>
+
+      <h3>Trisomia 13 — Sindrome di Patau</h3>
+      <p>La sopravvivenza è spesso limitata.</p>
+      <p>Può causare malformazioni cerebrali, problemi cardiaci, problemi renali e grave ritardo mentale e psicomotorio.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="fecondazione">
+      <h2>La fecondazione</h2>
+      <p>La gravidanza è il periodo di sviluppo intrauterino dell’individuo.</p>
+      <p>Negli esseri umani inizia con la fecondazione della cellula uovo, il gamete femminile, da parte dello spermatozoo, il gamete maschile.</p>
+      <p>La gravidanza termina con la nascita.</p>
+      <p>Questo periodo dura in media 40 settimane.</p>
+      <p>L’unione dei due gameti genera la prima cellula del nuovo individuo. Questa cellula prende il nome di zigote.</p>
+      <p>Lo zigote è costituito da 46 cromosomi: 23 di origine materna e 23 di origine paterna.</p>
+      <p>Ogni cromosoma è formato da molti geni. I geni rendono ogni individuo unico, con le sue caratteristiche.</p>
+      <p>Bisogna però ricordare che anche le condizioni ambientali, nutrizionali e comportamentali della madre incidono sullo sviluppo del bambino.</p>
+      <p>La fecondazione avviene intorno al quattordicesimo o quindicesimo giorno del ciclo sessuale femminile, quando l’ovaio espelle l’ovocita maturo nelle tube uterine.</p>
+      <p>A volte la fecondazione può avvenire nella cavità peritoneale. In questo caso può iniziare una gravidanza extrauterina, che di solito non arriva al termine.</p>
+
+      <h3>Stadi dello sviluppo embrionale</h3>
+      <ul>
+        <li>L’ovulo, circondato dalla corona radiata, va nella tuba di Falloppio e viene fecondato.</li>
+        <li>Si forma lo zigote unicellulare, con 23 cromosomi della madre e 23 del padre.</li>
+        <li>Nei giorni successivi avviene una crescita molto rapida delle cellule.</li>
+        <li>Al quarto giorno l’embrione ha 32 cellule e si chiama morula.</li>
+        <li>Poi prende il nome di blastula. Alcune cellule formeranno il bambino, altre formeranno placenta e vasi sanguigni.</li>
+        <li>Con l’annidamento, l’embrione entra nell’endometrio, cioè nella parete interna dell’utero, e si stabilisce la gravidanza.</li>
+        <li>Dopo l’annidamento continua lo sviluppo dell’embrione.</li>
+      </ul>
+
+      <h3>Sviluppo nei mesi</h3>
+      <ul>
+        <li>Primo mese: presenza e funzionamento del cuore.</li>
+        <li>Terzo mese: sesso del feto.</li>
+        <li>Fino al termine della gravidanza: sviluppo degli organi interni.</li>
+      </ul>
+
+      <h3>Gli annessi fetali</h3>
+      <p>Gli annessi fetali sono costituiti da:</p>
+      <ol>
+        <li>membrane ovulari, divise in amnio e corion;</li>
+        <li>placenta;</li>
+        <li>funicolo ombelicale;</li>
+        <li>liquido amniotico.</li>
+      </ol>
+      <p>Si formano durante lo sviluppo embrionale, ma non fanno parte del feto.</p>
+      <p>Servono a creare relazioni tra il feto e l’ambiente che lo circonda.</p>
+
+      <h3>Tipi di parto</h3>
+      <h3>1. Parto eutocico</h3>
+      <p>È il parto normale. Inizia e si conclude in modo spontaneo.</p>
+      <p>Il feto è in posizione cefalica e flessa. L’uscita avviene per via vaginale.</p>
+      <p>Il parto avviene attraverso contrazioni uterine regolari, dilatazione del collo dell’utero e uscita del feto dal canale del parto.</p>
+
+      <h3>2. Parto distocico</h3>
+      <p>Richiede un intervento medico o chirurgico.</p>
+      <p>Per distocia si intende una difficoltà fetale o materna durante il parto naturale.</p>
+      <p>Può essere causato da problemi con placenta, cordone ombelicale, liquido amniotico o posizione podalica del feto.</p>
+
+      <h3>Tecniche di procreazione assistita</h3>
+      <p>La PMA significa procreazione medicalmente assistita.</p>
+      <p>Le tecniche si dividono in:</p>
+      <ul>
+        <li><strong>tecniche più semplici</strong>: per esempio inseminazione intrauterina, in cui si introduce il liquido seminale nella cavità uterina;</li>
+        <li><strong>tecniche più complesse</strong>: l’incontro dei gameti, l’inseminazione dell’ovocita e la fecondazione avvengono fuori dal corpo della donna. Solo dopo l’embrione viene trasferito nell’utero.</li>
+      </ul>
+      <p>Le tecniche possono essere applicate in cicli “a fresco”, se ovociti ed embrioni non sono conservati congelati, oppure “da scongelamento”, se sono stati crioconservati.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="mst">
+      <h2>MST — Malattie sessualmente trasmissibili</h2>
+      <p>Le malattie sessualmente trasmissibili sono malattie che si trasmettono per via sessuale.</p>
+      <p>Possono avere gravi conseguenze nel tempo, come sterilità, tumori e maggiore vulnerabilità al virus HIV.</p>
+      <p>Sono malattie infettive. Si trasmettono per contagio diretto durante le attività sessuali, anche orali e anali.</p>
+      <p>All’inizio spesso non presentano sintomi. Questo aumenta la possibilità di trasmissione.</p>
+      <p>Dopo il periodo di incubazione, a volte anche dopo anni, possono comparire segni o sintomi sul corpo.</p>
+      <p>I segni compaiono di solito nella zona dove è avvenuto il contagio: genitali, ano, bocca o pelle.</p>
+      <p>I sintomi possono essere quasi assenti oppure molto evidenti.</p>
+
+      <h3>Come avviene il contagio</h3>
+      <ul>
+        <li>quando i microrganismi entrano nel corpo tramite sangue, sperma o secrezioni vaginali;</li>
+        <li>per contatto diretto pelle contro pelle;</li>
+        <li>per contatto tra le mucose.</li>
+      </ul>
+
+      <h3>Cause</h3>
+      <ul>
+        <li><strong>virus</strong>: epatiti, HIV, HPV, condilomi, herpes genitale;</li>
+        <li><strong>batteri</strong>: clamidia, gonorrea, sifilide;</li>
+        <li><strong>protozoi</strong>: tricomoniasi;</li>
+        <li><strong>parassiti</strong>: piattole e scabbia.</li>
+      </ul>
+
+      <p class="note">Per la prevenzione è fondamentale usare correttamente il preservativo.</p>
+
+      <h2>Malattie più frequenti</h2>
+
+      <h3>Candida</h3>
+      <p>È causata da un fungo chiamato Candida albicans, presente normalmente nel corpo.</p>
+      <p>Sintomi: arrossamento, bruciore, prurito, perdite bianche dense.</p>
+      <p>Terapia: farmaci antifungini.</p>
+
+      <h3>Clamidia</h3>
+      <p>È causata dal batterio Chlamydia trachomatis.</p>
+      <p>Sintomi: spesso assenti, possibili bruciori durante la minzione, dolore pelvico e perdite genitali.</p>
+      <p>Terapia: antibiotici.</p>
+
+      <h3>Gonorrea</h3>
+      <p>È causata dal batterio Neisseria gonorrhoeae.</p>
+      <p>Sintomi: a volte assenti, perdite genitali e dolore durante la minzione.</p>
+
+      <h3>Sifilide</h3>
+      <p>È causata dal batterio Treponema pallidum.</p>
+      <p>Sintomi iniziali: ulcera indolore.</p>
+      <p>Sintomi successivi: eruzioni cutanee e gravi danni agli organi.</p>
+      <p>Terapia: antibiotici, come la penicillina, molto efficace se presa presto.</p>
+
+      <h3>Piattole</h3>
+      <p>Sono parassiti, chiamati anche pidocchi del pube.</p>
+      <p>Sintomi: prurito intenso al pube.</p>
+      <p>Terapia: prodotti antiparassitari e lavaggio di indumenti e biancheria.</p>
+
+      <h3>Tricomoniasi</h3>
+      <p>È causata da parassiti.</p>
+      <p>Sintomi: spesso assente nell’uomo, perdite maleodoranti, prurito e bruciore.</p>
+      <p>Terapia: antibiotici.</p>
+
+      <h3>Papilloma virus</h3>
+      <p>È causato da un virus.</p>
+      <p>Sintomi: spesso nessuno. Alcuni ceppi possono causare tumori o verruche.</p>
+      <p>Terapia e prevenzione: vaccino e controlli regolari.</p>
+
+      <h3>Condiloma</h3>
+      <p>È una infezione da HPV.</p>
+      <p>Sintomi: verruche genitali morbide, non sempre dolorose.</p>
+      <p>Terapia: rimozione delle verruche con laser, chirurgia o farmaci. Il virus può restare latente.</p>
+
+      <h3>Herpes genitale</h3>
+      <p>È causato dal virus herpes simplex.</p>
+      <p>Sintomi: vescicole dolorose, prurito, bruciore e frequenti recidive.</p>
+      <p>Terapia: antivirali. Non eliminano il virus, ma riducono i sintomi.</p>
+
+      <h3>HIV-AIDS</h3>
+      <p>È un virus trasmesso tramite sangue, rapporti sessuali e da madre a figlio.</p>
+      <p>Sintomi: nella prima fase sintomi simili all’influenza. In seguito può comparire indebolimento del sistema immunitario.</p>
+      <p>Terapia: terapia antiretrovirale. Non si guarisce, ma permette di condurre una vita quasi normale.</p>
+
+      <h3>Epatite B e C</h3>
+      <p>Sono virus con una trasmissione simile all’HIV.</p>
+      <p>Sintomi: nausea, stanchezza e ittero, cioè pelle gialla.</p>
+      <p>Terapia per HBV: antivirali. Esiste anche il vaccino.</p>
+      <p>Terapia per HCV: farmaci antivirali specifici. Oggi è anche curabile.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="scabbia">
+      <h2>La scabbia</h2>
+      <p>La scabbia è una malattia della pelle causata da un acaro microscopico chiamato Sarcoptes scabiei.</p>
+      <p>Questo parassita scava piccoli cunicoli nello strato superficiale della pelle. In questi cunicoli depone le uova e causa infiammazione.</p>
+      <p>Si trasmette di solito per contatto con la pelle della persona infestata. Più raramente si trasmette attraverso gli indumenti.</p>
+      <p>Sintomi:</p>
+      <ul>
+        <li>prurito intenso, soprattutto di notte;</li>
+        <li>arrossamenti;</li>
+        <li>piccole vescicole;</li>
+        <li>lesioni cutanee.</li>
+      </ul>
+      <p>Le zone più colpite sono:</p>
+      <ul>
+        <li>addome;</li>
+        <li>area genitale;</li>
+        <li>ascelle;</li>
+        <li>gomiti;</li>
+        <li>spazi tra le dita delle mani.</li>
+      </ul>
+      <p>La diagnosi è clinica, cioè si basa sull’osservazione dei sintomi.</p>
+      <p>Il trattamento prevede creme e lozioni da applicare su tutto il corpo. Spesso il trattamento viene fatto anche ai contatti stretti, per prevenzione.</p>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
+
+    <section id="flashcard">
+      <h2>Flashcard con domande</h2>
+      <p>Leggi la domanda, prova a rispondere e poi premi sulla card per vedere la risposta.</p>
+
+      <div class="flashcard-grid">
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la spina bifida?</span>
+          <span class="answer">È una malformazione congenita della colonna vertebrale e del midollo spinale.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Quale vitamina è importante in gravidanza per ridurre il rischio di spina bifida?</span>
+          <span class="answer">L’acido folico.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cosa studia l’auxologia?</span>
+          <span class="answer">Studia la crescita del bambino e lo sviluppo fisico e sessuale dell’adolescente.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cosa sono le curve di crescita?</span>
+          <span class="answer">Sono grafici usati per controllare se la crescita del bambino è nei valori normali.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la MEN?</span>
+          <span class="answer">È la malattia emolitica neonatale, causata da incompatibilità tra sangue materno e fetale.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la bilirubina?</span>
+          <span class="answer">È un pigmento giallo prodotto dalla distruzione dei globuli rossi.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">A che cosa serve la fototerapia?</span>
+          <span class="answer">Serve a ridurre la bilirubina nel neonato attraverso l’esposizione alla luce.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Da cosa dipende la malattia emorragica del neonato?</span>
+          <span class="answer">Da una difficoltà di coagulazione legata alla carenza di vitamina K.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è l’asfissia neonatale?</span>
+          <span class="answer">È una carenza di ossigeno nel sangue e nei tessuti del neonato.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Come si valuta il neonato alla nascita?</span>
+          <span class="answer">Con il punteggio di Apgar.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">A cosa serve lo screening neonatale?</span>
+          <span class="answer">Serve a individuare precocemente alcune malattie congenite o metaboliche.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Quando si esegue lo screening neonatale metabolico?</span>
+          <span class="answer">Tra le 48 e le 72 ore di vita, con poche gocce di sangue dal tallone.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cosa sono le malattie metaboliche ereditarie?</span>
+          <span class="answer">Sono malattie genetiche che alterano il metabolismo e possono causare accumulo di sostanze tossiche.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la fenilchetonuria?</span>
+          <span class="answer">È una malattia in cui manca l’enzima che metabolizza la fenilalanina.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Qual è la terapia della fenilchetonuria?</span>
+          <span class="answer">Una dieta povera di fenilalanina.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la galattosemia?</span>
+          <span class="answer">È un difetto nel metabolismo del galattosio, uno zucchero del latte.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che differenza c’è tra esami prenatali non invasivi e invasivi?</span>
+          <span class="answer">I non invasivi non comportano rischio per il feto; gli invasivi prevedono un prelievo dall’utero e sono diagnostici.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è il NIPT?</span>
+          <span class="answer">È un test del DNA fetale presente nel sangue materno.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è l’amniocentesi?</span>
+          <span class="answer">È un esame invasivo che preleva liquido amniotico e analizza il cariotipo fetale.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la trisomia 21?</span>
+          <span class="answer">È la sindrome di Down.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la fecondazione?</span>
+          <span class="answer">È l’unione tra cellula uovo e spermatozoo.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è lo zigote?</span>
+          <span class="answer">È la prima cellula del nuovo individuo, formata dopo la fecondazione.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Quanti cromosomi ha lo zigote?</span>
+          <span class="answer">Ha 46 cromosomi: 23 dalla madre e 23 dal padre.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è l’annidamento?</span>
+          <span class="answer">È il momento in cui l’embrione entra nell’endometrio e si stabilisce la gravidanza.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è un parto eutocico?</span>
+          <span class="answer">È un parto normale, spontaneo e per via vaginale.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è un parto distocico?</span>
+          <span class="answer">È un parto con difficoltà, che richiede intervento medico o chirurgico.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cosa significa PMA?</span>
+          <span class="answer">Significa procreazione medicalmente assistita.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cosa sono le MST?</span>
+          <span class="answer">Sono malattie sessualmente trasmissibili.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Qual è uno strumento importante per prevenire le MST?</span>
+          <span class="answer">L’uso corretto del preservativo.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Come si trasmette l’HIV?</span>
+          <span class="answer">Tramite sangue, rapporti sessuali e da madre a figlio.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Che cos’è la scabbia?</span>
+          <span class="answer">È una malattia della pelle causata da un acaro microscopico.</span>
+        </button>
+
+        <button class="flashcard" onclick="this.classList.toggle('open')">
+          <span class="question">Qual è il sintomo principale della scabbia?</span>
+          <span class="answer">Il prurito intenso, soprattutto di notte.</span>
+        </button>
       </div>
-      <div class="row">
-        <label style="flex:1; flex-direction:column; align-items:flex-start;">
-          <span>Nome file:</span>
-          <input type="text" id="saveFileName"
-                 style="width:100%; margin-top:4px; padding:4px 6px; font-size:14px; box-sizing:border-box;">
-        </label>
-      </div>
-      <p style="font-size:12px; opacity:0.8; margin:4px 0 0;">
-        Puoi scrivere il nome senza estensione: verrà aggiunta automaticamente (.json o .html).
-      </p>
-      <div class="actions">
-        <button class="btn tiny" id="btnSaveCancel">Annulla</button>
-        <button class="btn tiny" id="btnSaveConfirm">Salva</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- PANNELLO OPZIONI STAMPA -->
-  <div class="modalOverlay" id="printOverlay">
-    <div class="modal">
-      <h3>Stampa mappa</h3>
-      <p style="font-size:14px; line-height:1.4; margin:6px 0 10px;">
-        Verrà stampata solo la <b>mappa mentale</b> visualizzata a schermo.<br>
-        Se l'impaginazione <b>non è corretta</b>, annullare la stampa e <b>usare i tasti in basso a destra</b> (+; -; pan) per centrare la mappa <b>nello schermo</b> prima di riprovare.
-        <br><br>
-        La stampa in PDF produce un file che viene salvato sul PC. Controllare di aver impostato come stampante "Salva come PDF" e non una stampante fisica (es. EPSON ecc.).
-      </p>
-      <div class="row">
-        <label style="font-size:14px;">
-          <input type="radio" name="printScope" value="map" checked>
-          Stampa mappa mentale
-        </label>
-      </div>
-      <div class="actions">
-        <button class="btn tiny" id="btnPrintCancel">Annulla</button>
-        <button class="btn tiny" id="btnPrintConfirm">Vai alla stampa</button>
-      </div>
-    </div>
-  </div>
+      <a class="top" href="#top">Torna all’indice</a>
+    </section>
 
-  <!-- Nuovi controlli flottanti -->
-  <div id="controlsLeft">
-    <button class="btn" id="btnMove_f">Sposta</button>
-    <button class="btn" id="btnLink_f">Collega</button>
-  </div>
-
-  <div id="controlsRight">
-    <button class="btn tiny" id="btnZoomIn_f">+</button>
-    <button class="btn tiny" id="btnZoomOut_f">-</button>
-    <button class="btn tiny" id="btnPan_f" title="Pan vista">✋</button>
-  </div>
-
-</div>
-
-<script>
-(function () {
-  var board = document.getElementById("board");
-  var svg = document.getElementById("wires");
-  var viewport = document.getElementById("viewport");
-  var world = document.getElementById("world");
-  var statusEl = document.getElementById("status");
-
-  var header = document.getElementById("mainHeader");
-  var headerHandle = document.getElementById("headerHandle");
-  var headerCollapsed = false;
-
-  headerHandle.addEventListener("click", function(e){
-    e.stopPropagation();
-    headerCollapsed = !headerCollapsed;
-    if (headerCollapsed) header.classList.add("collapsed");
-    else header.classList.remove("collapsed");
-  });
-
-  var btnNew = document.getElementById("btnNew");
-  var btnLink = document.getElementById("btnLink");
-  var btnDelete = document.getElementById("btnDelete");
-  var btnPdf = document.getElementById("btnPdf");
-  var btnImport = document.getElementById("btnImport");
-  var btnMove = document.getElementById("btnMove");
-  var btnPan = document.getElementById("btnPan");
-  var btnKeyboardHelp = document.getElementById("btnKeyboardHelp");
-  var kbdOverlay = document.getElementById("kbdOverlay");
-  var btnKbdClose = document.getElementById("btnKbdClose");
-  var fileInput = document.getElementById("fileInput");
-  var btnZoomIn = document.getElementById("btnZoomIn");
-  var btnZoomOut = document.getElementById("btnZoomOut");
-
-  // bottoni flottanti in basso
-  var btnZoomIn_f  = document.getElementById("btnZoomIn_f");
-  var btnZoomOut_f = document.getElementById("btnZoomOut_f");
-  var btnPan_f     = document.getElementById("btnPan_f");
-
-  var btnMove_f    = document.getElementById("btnMove_f");
-  var btnLink_f    = document.getElementById("btnLink_f");
-
-  // Nuovi pulsanti salvataggio
-  var btnQuickSave    = document.getElementById("btnQuickSave");
-  var btnSaveOptions  = document.getElementById("btnSaveOptions");
-  var saveOverlay     = document.getElementById("saveOverlay");
-  var saveFileNameInp = document.getElementById("saveFileName");
-  var btnSaveCancel   = document.getElementById("btnSaveCancel");
-  var btnSaveConfirm  = document.getElementById("btnSaveConfirm");
-  // Pannello stampa
-  var printOverlay   = document.getElementById("printOverlay");
-  var btnPrintCancel = document.getElementById("btnPrintCancel");
-  var btnPrintConfirm= document.getElementById("btnPrintConfirm");
-
-  // stato ultimo salvataggio
-  var lastSaveBaseName = "";
-  var lastSaveFormat   = "json";
-
-  var txtColor = document.getElementById("txtColor");
-  var btnSizeSmall = document.getElementById("btnSizeSmall");
-  var btnSizeLarge = document.getElementById("btnSizeLarge");
-  var btnBold = document.getElementById("btnBold");
-
-  function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
-  function uid(){ return Math.random().toString(36).slice(2, 10); }
-  function boardRect(){ return board.getBoundingClientRect(); }
-
-  var pops = [];   // {id,x,y,text,color,size,borderColor,borderSize,bold,height}
-  var links = [];  // {id,from,to,end,shape,curveDir}
-  var selectedBoxId = null;
-  var selectedBoxPart = null; // "text" o "border"
-  var selectedLinkId = null;
-  var linkingFrom = null;
-  var moveMode = false;
-  var panMode = false;
-
-  var view = { x: 0, y: 0, s: 1 };
-
-  function clampScale(s){
-    return Math.max(0.35, Math.min(2.8, s));
-  }
-
-  function applyView(){
-    viewport.style.transform = "translate(" + view.x + "px," + view.y + "px) scale(" + view.s + ")";
-  }
-
-  function screenToWorld(clientX, clientY){
-    var br = board.getBoundingClientRect();
-    var sx = clientX - br.left;
-    var sy = clientY - br.top;
-    return { x: (sx - view.x)/view.s, y: (sy - view.y)/view.s };
-  }
-
-  applyView();
-
-  var pointers = new Map();
-  var panState = null;
-  var pinchState = null;
-
-  function dist(a,b){
-    var dx=a.x-b.x, dy=a.y-b.y;
-    return Math.hypot(dx,dy);
-  }
-
-  board.addEventListener("pointerdown", function(e){
-    if (e.target.closest(".pop")) return;
-
-    board.setPointerCapture(e.pointerId);
-    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-
-    if (pointers.size === 1){
-      if (!panMode) {
-        panState = null;
-        return;
-      }
-      panState = { startX:view.x, startY:view.y, p0:{x:e.clientX,y:e.clientY} };
-      pinchState = null;
-    }
-
-    if (pointers.size === 2){
-      var arr = Array.from(pointers.values());
-      var pA = arr[0], pB = arr[1];
-      var mid = { x:(pA.x+pB.x)/2, y:(pA.y+pB.y)/2 };
-      var wMid = screenToWorld(mid.x, mid.y);
-
-      pinchState = {
-        startS: view.s,
-        startD: dist(pA,pB),
-        midScreen: mid,
-        midWorld: wMid
-      };
-      panState = null;
-    }
-  });
-
-  board.addEventListener("pointermove", function(e){
-    if (!pointers.has(e.pointerId)) return;
-    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
-
-    if (pinchState && pointers.size >= 2){
-      var arr = Array.from(pointers.values());
-      var pA = arr[0], pB = arr[1];
-      var d = dist(pA,pB);
-      view.s = clampScale(pinchState.startS * (d / pinchState.startD));
-
-      var br = board.getBoundingClientRect();
-      var midSx = pinchState.midScreen.x - br.left;
-      var midSy = pinchState.midScreen.y - br.top;
-
-      view.x = midSx - pinchState.midWorld.x * view.s;
-      view.y = midSy - pinchState.midWorld.y * view.s;
-
-      applyView();
-      renderLinks();
-      return;
-    }
-
-    if (pointers.size === 1 && panState){
-      var dx = e.clientX - panState.p0.x;
-      var dy = e.clientY - panState.p0.y;
-      view.x = panState.startX + dx;
-      view.y = panState.startY + dy;
-      applyView();
-      renderLinks();
-    }
-  });
-
-  board.addEventListener("pointerup", function(e){
-    pointers.delete(e.pointerId);
-    if (pointers.size === 0){
-      panState = null;
-      pinchState = null;
-    }
-  });
-
-  board.addEventListener("pointercancel", function(){
-    pointers.clear();
-    panState = null;
-    pinchState = null;
-  });
-
-  // Doppio tap su dispositivi touch (es. iPhone) per creare un pop
-  var lastTap = { time: 0, x: 0, y: 0 };
-  board.addEventListener("pointerup", function(e){
-    if (e.pointerType !== "touch") return;
-    if (panMode || moveMode) return;
-    if (e.target.closest(".pop")) return;
-
-    var now = Date.now();
-    var dt = now - lastTap.time;
-    var dx = e.clientX - lastTap.x;
-    var dy = e.clientY - lastTap.y;
-    var dist2 = dx*dx + dy*dy;
-
-    if (dt < 350 && dist2 < (40*40)) {
-      var p = screenToWorld(e.clientX, e.clientY);
-      var pos = clampToBoard(p.x, p.y);
-      createPop(pos.x, pos.y);
-      lastTap.time = 0;
-    } else {
-      lastTap.time = now;
-      lastTap.x = e.clientX;
-      lastTap.y = e.clientY;
-    }
-  });
-
-  board.addEventListener("wheel", function(e){
-    if (!e.ctrlKey) return;
-    e.preventDefault();
-
-    var before = screenToWorld(e.clientX, e.clientY);
-    var factor = (e.deltaY < 0) ? 1.08 : 0.92;
-    view.s = clampScale(view.s * factor);
-
-    var br = board.getBoundingClientRect();
-    var sx = e.clientX - br.left;
-    var sy = e.clientY - br.top;
-
-    view.x = sx - before.x * view.s;
-    view.y = sy - before.y * view.s;
-
-    applyView();
-    renderLinks();
-  }, { passive:false });
-
-  function zoomAroundCenter(factor){
-    var br = board.getBoundingClientRect();
-    var cx = br.left + br.width/2;
-    var cy = br.top + br.height/2;
-    var before = screenToWorld(cx, cy);
-
-    view.s = clampScale(view.s * factor);
-
-    var sx = cx - br.left;
-    var sy = cy - br.top;
-
-    view.x = sx - before.x * view.s;
-    view.y = sy - before.y * view.s;
-
-    applyView();
-    renderLinks();
-  }
-
-  var linkPreset = { end: "arrow", shape: "straight", curveDir: 1 };
-  var linkModal = null;
-
-  function ensureLinkModal() {
-    if (linkModal) return;
-
-    linkModal = document.createElement("div");
-    linkModal.className = "modalOverlay";
-    linkModal.innerHTML =
-      '<div class="modal" role="dialog" aria-modal="true">' +
-        '<h3>Opzioni collegamento</h3>' +
-        '<div class="row">' +
-          '<label><input type="radio" name="linkEnd" value="none"> Linea semplice</label>' +
-          '<label><input type="radio" name="linkEnd" value="arrow"> Freccia</label>' +
-        '</div>' +
-        '<div class="row">' +
-          '<label><input type="radio" name="linkShape" value="straight"> Retta</label>' +
-          '<label><input type="radio" name="linkShape" value="curve"> Curva</label>' +
-        '</div>' +
-        '<div class="row" data-curve-row>' +
-          '<label><input type="radio" name="curveDir" value="down"> Curva verso il basso</label>' +
-          '<label><input type="radio" name="curveDir" value="up"> Curva verso l\'alto</label>' +
-        '</div>' +
-        '<div class="actions">' +
-          '<button class="btn" id="linkOptCancel">Annulla</button>' +
-          '<button class="btn" id="linkOptOk">OK</button>' +
-        '</div>' +
-      '</div>';
-
-    document.body.appendChild(linkModal);
-
-    var shapeRadios = linkModal.querySelectorAll('input[name="linkShape"]');
-    var curveRadios = linkModal.querySelectorAll('input[name="curveDir"]');
-    var curveLabels = [];
-    curveRadios.forEach(function(r){
-      if (r.parentElement) curveLabels.push(r.parentElement);
-    });
-
-    function updateCurveRadiosDisabled() {
-      var shapeVal = (linkModal.querySelector('input[name="linkShape"]:checked') || {}).value;
-      var disabled = shapeVal !== 'curve';
-
-      curveRadios.forEach(function(r){
-        r.disabled = disabled;
-      });
-      curveLabels.forEach(function(lbl){
-        lbl.style.opacity = disabled ? 0.5 : 1;
-      });
-    }
-
-    shapeRadios.forEach(function(r){
-      r.addEventListener('change', updateCurveRadiosDisabled);
-    });
-
-    linkModal._updateCurveRadiosDisabled = updateCurveRadiosDisabled;
-  }
-
-  function openLinkOptions(done) {
-    ensureLinkModal();
-
-    var endRadio = linkModal.querySelector('input[name="linkEnd"][value="' + linkPreset.end + '"]');
-    var shapeRadio = linkModal.querySelector('input[name="linkShape"][value="' + linkPreset.shape + '"]');
-    if (endRadio) endRadio.checked = true;
-    if (shapeRadio) shapeRadio.checked = true;
-
-    var curveRadioVal = (linkPreset.curveDir === -1) ? "up" : "down";
-    var curveRadio = linkModal.querySelector('input[name="curveDir"][value="' + curveRadioVal + '"]');
-    if (curveRadio) curveRadio.checked = true;
-
-    if (typeof linkModal._updateCurveRadiosDisabled === "function") {
-      linkModal._updateCurveRadiosDisabled();
-    }
-
-    linkModal.style.display = "flex";
-
-    function close() {
-      linkModal.style.display = "none";
-      okBtn.onclick = null;
-      cancelBtn.onclick = null;
-      linkModal.onclick = null;
-    }
-
-    var okBtn = linkModal.querySelector("#linkOptOk");
-    var cancelBtn = linkModal.querySelector("#linkOptCancel");
-
-    okBtn.onclick = function () {
-      var endVal = (linkModal.querySelector('input[name="linkEnd"]:checked') || {}).value || "arrow";
-      var shapeVal = (linkModal.querySelector('input[name="linkShape"]:checked') || {}).value || "straight";
-
-      var curveDir = linkPreset.curveDir || 1;
-      if (shapeVal === "curve") {
-        var curveVal = (linkModal.querySelector('input[name="curveDir"]:checked') || {}).value || "down";
-        curveDir = (curveVal === "up") ? -1 : 1;
-      }
-
-      linkPreset = { end: endVal, shape: shapeVal, curveDir: curveDir };
-      close();
-      done(true);
-    };
-
-  cancelBtn.onclick = function () {
-      close();
-      done(false);
-    };
-
-    linkModal.onclick = function (e) {
-      if (e.target === linkModal) {
-        close();
-        done(false);
-      }
-    };
-  }
-
-  // NESSUN vincolo sui bordi: spazio di lavoro libero
-  function clampToBoard(x, y) {
-    return { x:x, y:y };
-  }
-
-  function disableTextControls() {
-    txtColor.disabled = true;
-    btnSizeSmall.disabled = true;
-    btnSizeLarge.disabled = true;
-    btnBold.disabled = true;
-
-    btnSizeSmall.classList.remove("active");
-    btnSizeLarge.classList.remove("active");
-    btnBold.classList.remove("active");
-  }
-
-  function enableTextControlsForText(p) {
-    txtColor.disabled = false;
-    btnSizeSmall.disabled = false;
-    btnSizeLarge.disabled = false;
-    btnBold.disabled = false;
-
-    if (!p.color) p.color = "#000000";
-    if (!p.size) p.size = "medium";
-    if (typeof p.bold === "undefined") p.bold = false;
-
-    txtColor.value = p.color;
-
-    btnSizeSmall.classList.toggle("active", p.size === "small");
-    btnSizeLarge.classList.toggle("active", p.size === "large");
-    btnBold.classList.toggle("active", !!p.bold);
-  }
-
-  function enableTextControlsForBorder(p) {
-    txtColor.disabled = false;
-    btnSizeSmall.disabled = false;
-    btnSizeLarge.disabled = false;
-    btnBold.disabled = true;
-
-    if (!p.borderColor) p.borderColor = p.color || "#000000";
-    if (!p.borderSize) p.borderSize = "thin";
-
-    txtColor.value = p.borderColor;
-
-    btnSizeSmall.classList.remove("active");
-    btnSizeLarge.classList.remove("active");
-    if (p.borderSize === "thin") {
-      btnSizeSmall.classList.add("active");
-    } else if (p.borderSize === "thick") {
-      btnSizeLarge.classList.add("active");
-    }
-  }
-
-  function enableTextControlsForLink(l) {
-    txtColor.disabled = false;
-    btnSizeSmall.disabled = true;
-    btnSizeLarge.disabled = true;
-    btnBold.disabled = true;
-
-    btnSizeSmall.classList.remove("active");
-    btnSizeLarge.classList.remove("active");
-    btnBold.classList.remove("active");
-
-    txtColor.value = l.color || "#000000";
-  }
-
-  function updateTextControls() {
-    if (selectedBoxId) {
-      var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-      if (!p) {
-        disableTextControls();
-        return;
-      }
-      if (selectedBoxPart === "border") {
-        enableTextControlsForBorder(p);
-      } else {
-        enableTextControlsForText(p);
-      }
-      return;
-    }
-
-    if (selectedLinkId) {
-      var l = links.find(function(ll){ return ll.id === selectedLinkId; });
-      if (!l) {
-        disableTextControls();
-        return;
-      }
-      enableTextControlsForLink(l);
-      return;
-    }
-
-    disableTextControls();
-  }
-
-  function clearSelections() {
-    selectedBoxId = null;
-    selectedBoxPart = null;
-    selectedLinkId = null;
-    var a = document.querySelectorAll(".pop");
-    for (var i=0;i<a.length;i++) a[i].classList.remove("selected");
-    var b = document.querySelectorAll(".linkLine");
-    for (var j=0;j<b.length;j++) b[j].classList.remove("selected");
-    updateTextControls();
-  }
-
-  function selectBox(id) {
-    selectedBoxId = id;
-    selectedLinkId = null;
-    var a = document.querySelectorAll(".pop");
-    for (var i=0;i<a.length;i++) {
-      a[i].classList.toggle("selected", a[i].dataset.id === id);
-    }
-    var b = document.querySelectorAll(".linkLine");
-    for (var j=0;j<b.length;j++) b[j].classList.remove("selected");
-    updateTextControls();
-  }
-
-  function selectLink(id) {
-    selectedLinkId = id;
-    selectedBoxId = null;
-    selectedBoxPart = null;
-    var a = document.querySelectorAll(".linkLine");
-    for (var i=0;i<a.length;i++) {
-      a[i].classList.toggle("selected", a[i].dataset.linkid === id);
-    }
-    var b = document.querySelectorAll(".pop");
-    for (var j=0;j<b.length;j++) b[j].classList.remove("selected");
-    updateTextControls();
-  }
-
-  function setPanMode(on){
-    panMode = !!on;
-    if (panMode){
-      btnPan.classList.add("active");
-      if (btnPan_f) btnPan_f.classList.add("active");
-      setStatus("Modalità Pan: trascina lo sfondo per spostarti.");
-    } else {
-      btnPan.classList.remove("active");
-      if (btnPan_f) btnPan_f.classList.remove("active");
-      setStatus("Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente");
-    }
-  }
-
-  function setLinkMode(on) {
-    if (on) {
-      if (moveMode) setMoveMode(false);
-      if (panMode) setPanMode(false);
-      if (!selectedBoxId) { setStatus("Seleziona un box prima di collegare."); return; }
-
-      linkPreset = linkPreset || { end:"arrow", shape:"straight", curveDir:1 };
-
-      openLinkOptions(function (ok) {
-        if (!ok) { setStatus("Collegamento annullato."); return; }
-
-        linkingFrom = selectedBoxId;
-        btnLink.classList.add("active");
-        var a = document.querySelectorAll(".pop");
-        for (var i=0;i<a.length;i++) {
-          a[i].classList.toggle("linking", a[i].dataset.id === linkingFrom);
-        }
-        setStatus("Modalita collega: clicca un altro box.");
-      });
-
-      return;
-    } else {
-      linkingFrom = null;
-      btnLink.classList.remove("active");
-      var b = document.querySelectorAll(".pop");
-      for (var j=0;j<b.length;j++) b[j].classList.remove("linking");
-      setStatus("Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente");
-    }
-  }
-
-  function setMoveMode(on) {
-    moveMode = !!on;
-
-    if (moveMode) {
-      setLinkMode(false);
-      setPanMode(false);
-      btnMove.classList.add("active");
-      if (btnMove_f) btnMove_f.classList.add("active");
-      setStatus("Modalita sposta: trascina i box.");
-    } else {
-      btnMove.classList.remove("active");
-      if (btnMove_f) btnMove_f.classList.remove("active");
-      setStatus("Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente");
-    }
-
-    var tas = document.querySelectorAll(".pop .body");
-    for (var i = 0; i < tas.length; i++) {
-      tas[i].readOnly = moveMode;
-    }
-  }
-
-  function autoGrow(ta, popModel) {
-    ta.style.height = "auto";
-
-    var computed = window.getComputedStyle(ta);
-    var lineH = parseFloat(computed.lineHeight);
-    if (isNaN(lineH)) {
-      lineH = parseFloat(computed.fontSize) * 1.25 || 18;
-    }
-
-    var txt = ta.value || "";
-    var needed;
-
-    if (!txt.trim()) {
-      if (popModel && popModel.bigIntro) {
-        needed = lineH * 4;
-      } else {
-        needed = lineH;
-      }
-    } else {
-      needed = ta.scrollHeight;
-      if (needed < lineH) needed = lineH;
-    }
-
-    if (popModel) {
-      popModel.height = needed;
-    }
-
-    ta.style.height = needed + "px";
-  }
-
-  function resizeSelectedTextarea() {
-    if (!selectedBoxId) return;
-    var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-    if (!p) return;
-    var ta = document.querySelector('.pop[data-id="' + selectedBoxId + '"] .body');
-    if (ta) autoGrow(ta, p);
-  }
-
-  function createPop(x, y) {
-    var isFirst = (pops.length === 0);
-
-    var p = {
-      id: uid(),
-      x: x,
-      y: y,
-      text: "",
-      color: "#000000",
-      borderColor: "#000000",
-      size: "medium",
-      borderSize: "thin",
-      bold: false,
-      height: 0,
-      bigIntro: isFirst
-    };
-
-    pops.push(p);
-    render();
-
-    selectBox(p.id);
-
-    setStatus(
-      "Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente"
-    );
-
-    var el = document.querySelector('.pop[data-id="' + p.id + '"] .body');
-    if (el) el.focus();
-  }
-
-  function addLink(from, to, preset) {
-    if (!from || !to || from === to) return;
-    for (var i=0;i<links.length;i++) {
-      if (links[i].from === from && links[i].to === to) return;
-    }
-    var p = preset || linkPreset || { end:"arrow", shape:"straight", curveDir:1 };
-    var curveDir = (typeof p.curveDir === "number") ? p.curveDir : 1;
-    links.push({ id: uid(), from: from, to: to, end: p.end, shape: p.shape, curveDir: curveDir });
-  }
-
-  function deleteSelected() {
-    if (selectedLinkId) {
-      links = links.filter(function (l) { return l.id !== selectedLinkId; });
-      selectedLinkId = null;
-      renderLinks();
-      setStatus("Collegamento eliminato.");
-      return;
-    }
-    if (selectedBoxId) {
-      var id = selectedBoxId;
-      pops = pops.filter(function (p) { return p.id !== id; });
-      links = links.filter(function (l) { return l.from !== id && l.to !== id; });
-      selectedBoxId = null;
-      if (linkingFrom === id) setLinkMode(false);
-      render();
-      setStatus("Box eliminato.");
-      return;
-    }
-    setStatus("Nessuna selezione.");
-  }
-
-  function getPopBoxInBoardCoords(id) {
-    var el = document.querySelector('.pop[data-id="'+id+'"]');
-    if (!el) return null;
-
-    var x = el.offsetLeft;
-    var y = el.offsetTop;
-    var w = el.offsetWidth;
-    var h = el.offsetHeight;
-
-    return {
-      cx: x + w/2, cy: y + h/2,
-      hw: w/2, hh: h/2
-    };
-  }
-
-  function edgePoint(cx, cy, hw, hh, dx, dy) {
-    if (dx === 0 && dy === 0) return { x: cx, y: cy };
-    var tx = Math.abs(dx) / hw;
-    var ty = Math.abs(dy) / hh;
-    var t = 1 / Math.max(tx, ty);
-    return { x: cx + dx * t, y: cy + dy * t };
-  }
-
-  function renderLinks() {
-    while (svg.firstChild) svg.firstChild.remove();
-
-    var NS = "http://www.w3.org/2000/svg";
-    var defs = document.createElementNS(NS, "defs");
-    var marker = document.createElementNS(NS, "marker");
-    marker.setAttribute("id", "arrow");
-    marker.setAttribute("viewBox", "0 0 10 10");
-    marker.setAttribute("refX", "9");
-    marker.setAttribute("refY", "5");
-    marker.setAttribute("markerWidth", "7");
-    marker.setAttribute("markerHeight", "7");
-    marker.setAttribute("orient", "auto");
-    marker.setAttribute("markerUnits", "strokeWidth");
-
-    var path = document.createElementNS(NS, "path");
-    path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-    path.setAttribute("fill", "rgba(0,0,0,.55)");
-    marker.appendChild(path);
-    defs.appendChild(marker);
-    svg.appendChild(defs);
-
-    links.forEach(function (l) {
-      var A = getPopBoxInBoardCoords(l.from);
-      var B = getPopBoxInBoardCoords(l.to);
-      if (!A || !B) return;
-
-      var dx = B.cx - A.cx;
-      var dy = B.cy - A.cy;
-
-      var p1 = edgePoint(A.cx, A.cy, A.hw, A.hh, dx, dy);
-      var p2 = edgePoint(B.cx, B.cy, B.hw, B.hh, -dx, -dy);
-
-      var end = l.end || "arrow";
-      var shape = l.shape || "straight";
-
-      var color = l.color || "#000000";
-      if (!l.color) {
-        var toPop = pops.find(function(pp){ return pp.id === l.to; });
-        if (toPop && toPop.color) color = toPop.color;
-      }
-
-      var elWire;
-
-      if (shape === "curve") {
-        var mx = (p1.x + p2.x) / 2;
-        var my = (p1.y + p2.y) / 2;
-
-        var len = Math.hypot(dx, dy) || 1;
-        var nx = -dy / len;
-        var ny =  dx / len;
-
-        var offset = Math.min(70, Math.max(20, len / 4));
-        var dir = (typeof l.curveDir === "number") ? l.curveDir : 1;
-        var cx = mx + nx * offset * dir;
-        var cy = my + ny * offset * dir;
-
-        elWire = document.createElementNS(NS, "path");
-        elWire.setAttribute("fill", "none");
-        elWire.setAttribute("d", "M " + p1.x + " " + p1.y + " Q " + cx + " " + cy + " " + p2.x + " " + p2.y);
-      } else {
-        elWire = document.createElementNS(NS, "line");
-        elWire.setAttribute("x1", p1.x);
-        elWire.setAttribute("y1", p1.y);
-        elWire.setAttribute("x2", p2.x);
-        elWire.setAttribute("y2", p2.y);
-      }
-
-      if (end === "arrow") {
-        elWire.setAttribute("marker-end", "url(#arrow)");
-      }
-
-      elWire.classList.add("linkLine");
-      elWire.dataset.linkid = l.id;
-      elWire.style.stroke = color;
-
-      if (l.id === selectedLinkId) elWire.classList.add("selected");
-
-      function handlePointerDown(e){
-        e.stopPropagation();
-        setLinkMode(false);
-        selectLink(l.id);
-        setStatus("Collegamento selezionato.");
-      }
-
-      function handleDblClick(e){
-        e.stopPropagation();
-        setLinkMode(false);
-        selectLink(l.id);
-
-        linkPreset = {
-          end: l.end || "arrow",
-          shape: l.shape || "straight",
-          curveDir: (typeof l.curveDir === "number") ? l.curveDir : 1
-        };
-
-        openLinkOptions(function(ok){
-          if (!ok) {
-            setStatus("Modifica collegamento annullata.");
-            return;
-          }
-          l.end = linkPreset.end;
-          l.shape = linkPreset.shape;
-          l.curveDir = linkPreset.curveDir;
-          renderLinks();
-          setStatus("Collegamento aggiornato.");
-        });
-      }
-
-      elWire.addEventListener("pointerdown", handlePointerDown);
-      elWire.addEventListener("dblclick", handleDblClick);
-
-      svg.appendChild(elWire);
-    });
-  }
-
-  function render() {
-    var old = world.querySelectorAll(".pop");
-    for (var i=0;i<old.length;i++) old[i].remove();
-
-    var ghost = board.querySelector(".ghost");
-    if (ghost) ghost.style.display = pops.length ? "none" : "flex";
-
-    pops.forEach(function (p, idx) {
-      if (!p.color) p.color = "#000000";
-      if (!p.size) p.size = "medium";
-      if (typeof p.bold === "undefined") p.bold = false;
-
-      var el = document.createElement("div");
-      el.className = "pop";
-      el.dataset.id = p.id;
-      el.style.left = p.x + "px";
-      el.style.top  = p.y + "px";
-
-      el.style.borderColor = p.color || "#000000";
-
-      var placeholderAttr = "";
-      if (idx === 0) {
-        placeholderAttr = ' placeholder="Scrivi qui l&#39;argomento a cui stai pensando e di cui vuoi fare una mappa."';
-      } else {
-        placeholderAttr = ' placeholder=""';
-      }
-
-      el.innerHTML =
-        '<textarea class="body" spellcheck="false" rows="1" cols="6"' + placeholderAttr + '></textarea>';
-
-      var ta = el.querySelector(".body");
-
-      ta.value = p.text || "";
-
-      var textSizeKey = p.size || "medium";
-      var fontSizePx;
-      if (textSizeKey === "small") {
-        fontSizePx = "14px";
-      } else if (textSizeKey === "large") {
-        fontSizePx = "22px";
-      } else {
-        fontSizePx = "18px";
-      }
-
-      var borderSizeKey = p.borderSize || "thin";
-      var borderWidth;
-      if (borderSizeKey === "thin") {
-        borderWidth = 1;
-      } else if (borderSizeKey === "thick") {
-        borderWidth = 3;
-      } else {
-        borderWidth = 2;
-      }
-
-      ta.style.fontSize = fontSizePx;
-      ta.style.fontWeight = p.bold ? "700" : "400";
-      ta.style.color = p.color || "#000000";
-      el.style.borderWidth = borderWidth + "px";
-      el.style.borderColor = p.borderColor || "#000000";
-
-      if (typeof p.height === "number" && p.height > 0) {
-        ta.style.height = p.height + "px";
-      } else {
-        autoGrow(ta, p);
-      }
-
-      if (p.id === selectedBoxId) el.classList.add("selected");
-      if (p.id === linkingFrom) el.classList.add("linking");
-
-      ta.addEventListener("focus", function () {
-        selectedBoxPart = "text";
-        selectBox(p.id);
-
-        // Su smartphone, chiudo l'header e porto il box al centro
-        if (window.innerWidth <= 768) {
-          headerCollapsed = true;
-          header.classList.add("collapsed");
-          setTimeout(function(){
-            try {
-              el.scrollIntoView({ block: "center", behavior: "smooth" });
-            } catch(e) {}
-          }, 80);
-        }
-      });
-
-      ta.addEventListener("mousedown", function (e) {
-        selectedBoxPart = "text";
-        selectBox(p.id);
-        if (linkingFrom && linkingFrom !== p.id) e.preventDefault();
-      });
-
-      ta.addEventListener("input", function (e) {
-        p.text = e.target.value;
-        autoGrow(ta, p);
-        renderLinks();
-      });
-
-      el.addEventListener("click", function () {
-        if (linkingFrom && linkingFrom !== p.id) {
-          addLink(linkingFrom, p.id, linkPreset);
-          setLinkMode(false);
-          renderLinks();
-          setStatus("Collegamento creato.");
-        }
-      });
-
-      var dragging = false, sx=0, sy=0, ox=0, oy=0;
-
-      el.addEventListener("pointerdown", function (e) {
-        if (e.target && e.target.classList && e.target.classList.contains("body")) selectedBoxPart = "text"; else selectedBoxPart = "border";
-        if (e.pointerType === "mouse" && e.button !== 0) return;
-        if (!moveMode && e.target && e.target.tagName && e.target.tagName.toLowerCase() === "textarea") return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        setLinkMode(false);
-        selectBox(p.id);
-
-        dragging = true;
-        sx = e.clientX; sy = e.clientY;
-        ox = p.x; oy = p.y;
-
-        if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
-
-        function onMove(ev) {
-          if (!dragging) return;
-          var dx = (ev.clientX - sx) / view.s;
-          var dy = (ev.clientY - sy) / view.s;
-          var pos = clampToBoard(ox + dx, oy + dy);
-          p.x = pos.x; p.y = pos.y;
-          el.style.left = p.x + "px";
-          el.style.top  = p.y + "px";
-          renderLinks();
-        }
-
-        function onUp(ev) {
-          dragging = false;
-          window.removeEventListener("pointermove", onMove);
-          window.removeEventListener("pointerup", onUp);
-        }
-
-        window.addEventListener("pointermove", onMove, { passive:false });
-        window.addEventListener("pointerup", onUp, { passive:true });
-      });
-
-      world.appendChild(el);
-    });
-
-    renderLinks();
-    updateTextControls();
-  }
-
-  function getState() {
-    return { version: 3, createdAt: new Date().toISOString(), pops: pops, links: links };
-  }
-
-  function downloadBlob(name, blob) {
-    var a = document.createElement("a");
-    var url = URL.createObjectURL(blob);
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  }
-
-  function exportJSON(customBaseName) {
-    var stateStr = JSON.stringify(getState(), null, 2);
-    var blob = new Blob([stateStr], { type: "application/json;charset=utf-8" });
-
-    var filename;
-    if (customBaseName && customBaseName.trim()) {
-      var base = customBaseName.trim();
-      if (!/\.(json)$/i.test(base)) base += ".json";
-      filename = base;
-    } else {
-      filename = "mappa_" + new Date().toISOString().slice(0,19).split(":").join("-") + ".json";
-    }
-
-    downloadBlob(filename, blob);
-    setStatus("Esportato JSON (" + filename + ").");
-  }
-
-  function exportHTML(customBaseName) {
-    var state = JSON.stringify(getState(), null, 2);
-
-    var html =
-      '<!doctype html>' +
-      '<html lang="it">' +
-      '<head>' +
-      '<meta charset="utf-8"/>' +
-      '<meta name="viewport" content="width=device-width, initial-scale=1"/>' +
-      '<title>Mappa esportata</title>' +
-      '</head>' +
-      '<body>' +
-      '<h3>Mappa esportata</h3>' +
-      '<p>Importa questo file nell\'app con il pulsante Importa.</p>' +
-      '<textarea id="popplet_export_data" style="display:none;">' +
-      state +
-      '</textarea>' +
-      '</body>' +
-      '</html>';
-
-    var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-
-    var filename;
-    if (customBaseName && customBaseName.trim()) {
-      var base = customBaseName.trim();
-      if (!/\.(html?|htm)$/i.test(base)) base += ".html";
-      filename = base;
-    } else {
-      filename = "mappa_" + new Date().toISOString().slice(0,19).replace(/:/g,'-') + ".html";
-    }
-
-    downloadBlob(filename, blob);
-    setStatus("Esportato HTML (" + filename + ").");
-  }
-
-  function parseImportedText(text) {
-    var t = (text || "").trim();
-
-    if (t.charAt(0) === "{" || t.charAt(0) === "[") {
-      return JSON.parse(t);
-    }
-
-    var re = /<textarea[^>]*id=["']popplet_export_data["'][^>]*>([\s\S]*?)<\/textarea>/i;
-    var m = text.match(re);
-    if (!m) throw new Error("File non riconosciuto");
-
-    return JSON.parse(m[1]);
-  }
-
-  function applyState(state) {
-    if (!state || !state.pops || !state.links) throw new Error("Dati incompleti");
-
-    pops = state.pops;
-    links = state.links;
-
-    clearSelections();
-    setLinkMode(false);
-    render();
-    setStatus("Import OK.");
-  }
-
-  function exportPDF() {
-    setStatus("Stampa: scegli Salva come PDF.");
-    window.print();
-  }
-
-  board.addEventListener("mousedown", function (e) {
-    if (e.target === board) {
-      clearSelections();
-      setLinkMode(false);
-      setStatus("Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente");
-    }
-  });
-
-  board.addEventListener("dblclick", function (e) {
-    if (e.target && e.target.closest && e.target.closest(".pop")) return;
-    var p = screenToWorld(e.clientX, e.clientY);
-    var pos = clampToBoard(p.x, p.y);
-    createPop(pos.x, pos.y);
-  });
-
-  window.addEventListener("keydown", function (e) {
-    var key = (e.key || "").toLowerCase();
-    if (key === "delete" || key === "backspace") {
-      var active = document.activeElement;
-      var inEditor = active && active.tagName === "TEXTAREA";
-      if (!inEditor) { e.preventDefault(); deleteSelected(); }
-    }
-    if (key === "escape") setLinkMode(false);
-  });
-
-  btnNew.addEventListener("click", function () {
-    var r = boardRect();
-    createPop(20 + Math.random()*(r.width-260), 20 + Math.random()*(r.height-160));
-  });
-  btnLink.addEventListener("click", function () { setLinkMode(!linkingFrom); });
-  btnDelete.addEventListener("click", deleteSelected);
-  btnMove.addEventListener("click", function () { setMoveMode(!moveMode); });
-
-  btnPan.addEventListener("click", function () {
-    var newOn = !panMode;
-    if (newOn) {
-      setMoveMode(false);
-      setLinkMode(false);
-    }
-    setPanMode(newOn);
-  });
-
-  btnPdf.addEventListener("click", function(){
-    if (printOverlay) {
-      printOverlay.style.display = "flex";
-    } else {
-      exportPDF();
-    }
-  });
-  btnImport.addEventListener("click", doImport);
-  btnZoomIn.addEventListener("click", function(){ zoomAroundCenter(1.15); });
-  btnZoomOut.addEventListener("click", function(){ zoomAroundCenter(1/1.15); });
-
-  // Apertura pannello Opzioni salvataggio
-  function openSaveOverlay() {
-    if (!saveOverlay) return;
-    // preset nome file
-    if (saveFileNameInp) {
-      saveFileNameInp.value = lastSaveBaseName || "";
-    }
-    // preset formato
-    var radios = saveOverlay.querySelectorAll('input[name="saveFormat"]');
-    var current = lastSaveFormat || "json";
-    radios.forEach(function(r){
-      r.checked = (r.value === current);
-    });
-
-    saveOverlay.style.display = "flex";
-    if (saveFileNameInp) {
-      setTimeout(function(){
-        saveFileNameInp.focus();
-        saveFileNameInp.select();
-      }, 50);
-    }
-  }
-
-  function closeSaveOverlay() {
-    if (saveOverlay) saveOverlay.style.display = "none";
-  }
-
-  if (btnSaveOptions) {
-    btnSaveOptions.addEventListener("click", function(){
-      openSaveOverlay();
-    });
-  }
-
-  if (btnSaveCancel) {
-    btnSaveCancel.addEventListener("click", function(){
-      closeSaveOverlay();
-    });
-  }
-
-  if (saveOverlay) {
-    saveOverlay.addEventListener("click", function(e){
-      if (e.target === saveOverlay) {
-        closeSaveOverlay();
-      }
-    });
-  }
-
-  // Gestione pannello stampa
-  if (btnPrintCancel && printOverlay) {
-    btnPrintCancel.addEventListener("click", function(){
-      printOverlay.style.display = "none";
-    });
-  }
-  if (btnPrintConfirm && printOverlay) {
-    btnPrintConfirm.addEventListener("click", function(){
-      printOverlay.style.display = "none";
-      exportPDF();
-    });
-  }
-
-  if (btnSaveConfirm) {
-    btnSaveConfirm.addEventListener("click", function(){
-      if (!saveOverlay) return;
-
-      var baseName = (saveFileNameInp && saveFileNameInp.value.trim()) || "";
-      if (!baseName) {
-        baseName = "mappa_mentale";
-      }
-
-      var radios = saveOverlay.querySelectorAll('input[name="saveFormat"]');
-      var chosen = "json";
-      radios.forEach(function(r){
-        if (r.checked) chosen = r.value;
-      });
-
-      lastSaveBaseName = baseName;
-      lastSaveFormat   = chosen;
-
-      if (chosen === "html") {
-        exportHTML(baseName);
-      } else {
-        exportJSON(baseName);
-      }
-
-      closeSaveOverlay();
-    });
-  }
-
-  // Salva rapido: sempre JSON, riusa il nome dell'ultima volta (se presente)
-  if (btnQuickSave) {
-    btnQuickSave.addEventListener("click", function(){
-      if (lastSaveBaseName) {
-        exportJSON(lastSaveBaseName);
-      } else {
-        exportJSON(null);  // nome con timestamp
-      }
-    });
-  }
-
-  // Collego i pulsanti flottanti alle stesse azioni dei bottoni originali
-  if (btnZoomIn_f) {
-    btnZoomIn_f.addEventListener("click", function(){
-      btnZoomIn.click();
-    });
-  }
-
-  if (btnZoomOut_f) {
-    btnZoomOut_f.addEventListener("click", function(){
-      btnZoomOut.click();
-    });
-  }
-
-  if (btnPan_f) {
-    btnPan_f.addEventListener("click", function(){
-      btnPan.click();
-    });
-  }
-
-  if (btnMove_f) {
-    btnMove_f.addEventListener("click", function(){
-      btnMove.click();
-    });
-  }
-
-  if (btnLink_f) {
-    btnLink_f.addEventListener("click", function(){
-      btnLink.click();
-    });
-  }
-
-  txtColor.addEventListener("input", function(){
-    var newColor = txtColor.value || "#000000";
-
-    // Se è selezionato un collegamento, cambia colore alla freccia
-    if (selectedLinkId && !selectedBoxId) {
-      var l = links.find(function(ll){ return ll.id === selectedLinkId; });
-      if (l) {
-        l.color = newColor;
-        renderLinks();
-      }
-      return;
-    }
-
-    // Se è selezionato un box, controlla se stai lavorando su testo o bordo
-    if (!selectedBoxId) return;
-    var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-    if (!p) return;
-
-    if (selectedBoxPart === "text") {
-      p.color = newColor;
-      var ta = document.querySelector('.pop[data-id="'+p.id+'"] .body');
-      if (ta) ta.style.color = p.color;
-    } else {
-      p.borderColor = newColor;
-      var boxEl = document.querySelector('.pop[data-id="'+p.id+'"]');
-      if (boxEl) boxEl.style.borderColor = p.borderColor;
-    }
-
-    renderLinks();
-  });
-
-  btnSizeSmall.addEventListener("click", function(){
-    if (!selectedBoxId) return;
-    var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-    if (!p) return;
-
-    if (selectedBoxPart === "border") {
-      // scala bordo verso il più sottile: thick -> medium -> thin
-      var current = p.borderSize || "thin";
-      if (current === "thick") current = "medium";
-      else current = "thin";
-      p.borderSize = current;
-    } else {
-      // scala testo verso il più piccolo: large -> medium -> small
-      var current = p.size || "medium";
-      if (current === "large") current = "medium";
-      else current = "small";
-      p.size = current;
-    }
-
-    var ta = document.querySelector('.pop[data-id="'+p.id+'"] .body');
-    if (ta) {
-      autoGrow(ta, p);
-    }
-    render();
-    updateTextControls();
-  });
-
-  btnSizeLarge.addEventListener("click", function(){
-    if (!selectedBoxId) return;
-    var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-    if (!p) return;
-
-    if (selectedBoxPart === "border") {
-      // scala bordo verso il più spesso: thin -> medium -> thick
-      var current = p.borderSize || "thin";
-      if (current === "thin") current = "medium";
-      else current = "thick";
-      p.borderSize = current;
-    } else {
-      // scala testo verso il più grande: small -> medium -> large
-      var current = p.size || "medium";
-      if (current === "small") current = "medium";
-      else current = "large";
-      p.size = current;
-    }
-
-    var ta = document.querySelector('.pop[data-id="'+p.id+'"] .body');
-    if (ta) {
-      autoGrow(ta, p);
-    }
-    render();
-    updateTextControls();
-  });
-
-  btnBold.addEventListener("click", function(){
-    if (!selectedBoxId) return;
-    var p = pops.find(function(pp){ return pp.id === selectedBoxId; });
-    if (!p) return;
-    p.bold = !p.bold;
-    var ta = document.querySelector('.pop[data-id="'+p.id+'"] .body');
-    if (ta) {
-      ta.style.fontWeight = p.bold ? "700" : "400";
-      autoGrow(ta, p);
-    }
-    updateTextControls();
-  });
-
-  function doImport() {
-    fileInput.value = "";
-    fileInput.click();
-  }
-
-  fileInput.addEventListener("change", function (e) {
-    var file = e.target.files && e.target.files[0];
-    if (!file) return;
-    file.text().then(function (text) {
-      var state = parseImportedText(text);
-      applyState(state);
-    }).catch(function (err) {
-      console.error(err);
-      setStatus("Errore import.");
-      alert("Import fallito: usa un file esportato da questa app (JSON o HTML).");
-    });
-  });
-
-  btnKeyboardHelp.addEventListener("click", function(){
-    kbdOverlay.style.display = "flex";
-  });
-  btnKbdClose.addEventListener("click", function(){
-    kbdOverlay.style.display = "none";
-  });
-  kbdOverlay.addEventListener("click", function(e){
-    if (e.target === kbdOverlay) {
-      kbdOverlay.style.display = "none";
-    }
-  });
-
-  render();
-  setStatus("Pensa ad un argomento e scrivigli intorno tutto quello che ti viene in mente");
-
-  /* --- ADATTAMENTO CONTROLLI FLOTTANTI CON TASTIERA MOBILE --- */
-  if (window.visualViewport) {
-    var vv = window.visualViewport;
-    var baseBottom = 20;
-
-    function adjustForKeyboard() {
-      // solo su dispositivi piccoli ha senso
-      if (window.innerWidth > 900) {
-        document.documentElement.style.setProperty('--controls-bottom', baseBottom + 'px');
-        return;
-      }
-      var delta = window.innerHeight - vv.height;
-      if (delta > 100) {
-        // probabile tastiera aperta: alzo i controlli sopra
-        document.documentElement.style.setProperty(
-          '--controls-bottom',
-          (delta + baseBottom) + 'px'
-        );
-      } else {
-        document.documentElement.style.setProperty('--controls-bottom', baseBottom + 'px');
-      }
-    }
-
-    vv.addEventListener('resize', adjustForKeyboard);
-    window.addEventListener('orientationchange', function(){
-      setTimeout(adjustForKeyboard, 300);
-    });
-
-    adjustForKeyboard();
-  }
-})();
-</script>
+  </main>
 </body>
 </html>
